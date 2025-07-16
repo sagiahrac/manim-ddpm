@@ -6,3 +6,4 @@ from .forward_diffusion_slide import ForwardDiffusionSlide
 from .reverse_denoising_slide import ReverseDenoisingSlide
 from .mathematical_formulation_slide import MathematicalFormulationSlide
 from .training_process_slide import TrainingProcessSlide
+from .celebahq_demo_slide import CelebAHQDemoSlide

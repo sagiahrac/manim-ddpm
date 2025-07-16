@@ -11,10 +11,11 @@ Usage examples:
 - manim individual_scenes.py ReverseDenoisingSlideScene -ql
 - manim individual_scenes.py MathematicalFormulationSlideScene -ql
 - manim individual_scenes.py TrainingProcessSlideScene -ql
+- manim individual_scenes.py CelebAHQDemoSlideScene -ql
 """
 
 from manim import *
-from ddpm_manim import TitleSlide, DiffusionIntroSlide, ProcessOverviewSlide, IntuitionSlide, ForwardDiffusionSlide, ReverseDenoisingSlide, MathematicalFormulationSlide, TrainingProcessSlide
+from ddpm_manim import TitleSlide, DiffusionIntroSlide, ProcessOverviewSlide, IntuitionSlide, ForwardDiffusionSlide, ReverseDenoisingSlide, MathematicalFormulationSlide, TrainingProcessSlide, CelebAHQDemoSlide
 
 # Create proper scene classes for individual rendering
 class TitleSlideScene(TitleSlide):
@@ -39,4 +40,7 @@ class MathematicalFormulationSlideScene(MathematicalFormulationSlide):
     pass
 
 class TrainingProcessSlideScene(TrainingProcessSlide):
+    pass
+
+class CelebAHQDemoSlideScene(CelebAHQDemoSlide):
     pass
