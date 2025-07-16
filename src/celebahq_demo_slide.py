@@ -1,110 +1,111 @@
 from manim import *
 from .base import DDPMBaseMixin
+import numpy as np
+from PIL import Image
 
 class CelebAHQDemoSlide(Scene, DDPMBaseMixin):
     def construct(self):
         self.setup_3b1b_style()
         
-        # Title
-        title = Text("DDPM Results on CelebA-HQ", 
-                    font="TeX Gyre Termes", font_size=40, color="#DDA0DD")
-        title.to_edge(UP, buff=0.8)
-        self.play(Write(title))
-        self.wait(1)
+        pil_image = Image.open("media/images/celebahq_combined_6.png")
+        img_width, img_height = pil_image.size
         
-        # Load the concatenated image
-        try:
-            # Load the full image first
-            full_img = ImageMobject("media/images/celebahq_combined_6.png")
-            full_img.scale_to_fit_height(5)  # Scale to fit nicely
-            full_img.move_to(ORIGIN)
+        # Calculate slice dimensions for 2×3 grid (2 columns, 3 rows)
+        slice_width = img_width // 3
+        slice_height = img_height // 2
+        
+        # Define slice positions and create cropped images
+        slice_info = [
+            {"pos": (0, 0), "name": "Top Left"},      # Row 0, Col 0
+            {"pos": (0, 1), "name": "Top Right"},     # Row 0, Col 1  
+            {"pos": (0, 2), "name": "Middle Left"},   # Row 0, Col 2
+            {"pos": (1, 0), "name": "Middle Right"},  # Row 1, Col 0
+            {"pos": (1, 1), "name": "Bottom Left"},   # Row 1, Col 1
+            {"pos": (1, 2), "name": "Bottom Right"}   # Row 1, Col 2
+        ]
+        
+        # Create temporary slice image files
+        slice_paths = []
+        for i, slice_data in enumerate(slice_info):
+            row, col = slice_data["pos"]
             
-            # Show the full concatenated image briefly
-            description = Text("Generated faces using DDPM (2×3 grid)", 
-                             font_size=24, color="#87CEEB")
-            description.to_edge(DOWN, buff=1)
+            # Calculate crop box (left, top, right, bottom)
+            left = col * slice_width
+            top = row * slice_height
+            right = left + slice_width
+            bottom = top + slice_height
             
-            self.play(FadeIn(full_img), Write(description))
-            self.wait(2)
+            # Crop the slice
+            slice_pil = pil_image.crop((left, top, right, bottom))
             
-            # Fade out description
-            self.play(FadeOut(description))
+            # Save temporary slice
+            slice_path = f"media/images/temp_slice_{i}.png"
+            slice_pil.save(slice_path)
+            slice_paths.append(slice_path)
+        
+        # Now show each slice individually
+        current_slice = None
+        
+        for i, (slice_path, slice_data) in enumerate(zip(slice_paths, slice_info)):
+            slice_name = slice_data["name"]
             
-            # Now create individual slices
-            # The image is 2×3 grid, so we need to create 6 individual slices
-            slice_labels = [
-                "Sample 1", "Sample 2", "Sample 3", 
-                "Sample 4", "Sample 5", "Sample 6"
-            ]
+            # Create the slice image
+            slice_img = ImageMobject(slice_path)
+            slice_img.scale_to_fit_height(4)
+            slice_img.move_to(ORIGIN)
             
-            # Show each slice individually with smooth crossfade
-            for i in range(6):
-                # Create the slice image (same source, but we'll position it)
-                slice_img = ImageMobject("media/images/celebahq_combined_6.png")
-                slice_img.scale_to_fit_height(5)
-                slice_img.move_to(ORIGIN)
+            # Create label for this slice
+            slice_label = Text(f"{slice_name}", 
+                                font_size=28, color="#FFD700", weight=BOLD)
+            slice_label.to_edge(DOWN, buff=1)
+            
+            # Create sample description
+            sample_desc = Text(f"Generated Sample {i+1}", 
+                                font_size=20, color="#87CEEB")
+            sample_desc.next_to(slice_label, DOWN, buff=0.3)
+            
+            if i == 0:
+                # slice_img.set_opacity(0)
+                self.play(
+                    FadeIn(slice_img),
+                    run_time=1.5
+                )
+            else:
+                # Subsequent slices: slide transition effect
+                slice_img.shift(RIGHT * 10)
+                self.play(
+                    current_slice.animate.shift(LEFT * 10),
+                    slice_img.animate.shift(LEFT * 10),
+                    run_time=1.5
+                )
                 
-                # Create label for this slice
-                slice_label = Text(slice_labels[i], 
-                                 font_size=24, color="#FFD700", weight=BOLD)
-                slice_label.to_edge(DOWN, buff=0.8)
-                
-                if i == 0:
-                    # First slice: fade out full image, fade in first slice
-                    self.play(
-                        FadeOut(full_img),
-                        FadeIn(slice_img),
-                        Write(slice_label),
-                        run_time=1.5
-                    )
-                else:
-                    # Subsequent slices: crossfade from previous slice
-                    prev_slice = ImageMobject("celebahq_combined_6.png")
-                    prev_slice.scale_to_fit_height(5)
-                    prev_slice.move_to(ORIGIN)
+            # Hold on each slice
+            self.wait(1.0)
+            
+            # Store current elements for next iteration
+            current_slice = slice_img
+        
+            
+        # Final flourish
+        self.play(
+            FadeOut(current_slice),
+            run_time=1
+        )
+        
+        self.wait(2)
+            
+        # Clean up temporary files
+        import os
+        for slice_path in slice_paths:
+            try:
+                os.remove(slice_path)
+            except:
+                pass
                     
-                    prev_label = Text(slice_labels[i-1], 
-                                    font_size=24, color="#FFD700", weight=BOLD)
-                    prev_label.to_edge(DOWN, buff=0.8)
-                    
-                    self.play(
-                        FadeOut(prev_label),
-                        FadeOut(prev_slice),
-                        FadeIn(slice_img),
-                        Write(slice_label),
-                        run_time=1.2
-                    )
-                
-                # Hold on each slice
-                self.wait(1.5)
-                
-                # Store current slice for next iteration
-                if i < 5:  # Don't remove the last one yet
-                    current_slice = slice_img
-                    current_label = slice_label
-            
-            # Final message
-            self.wait(0.5)
-            final_message = Text("High-quality, diverse face generation with DDPM", 
-                               font_size=26, color="#90EE90", weight=BOLD)
-            final_message.to_edge(DOWN, buff=1.5)
-            
-            self.play(
-                FadeOut(slice_label),
-                Write(final_message),
-                run_time=1
-            )
-            
-            self.wait(3)
-            
-        except Exception as e:
-            # Fallback if image not found
-            error_text = Text("Image not found: celebahq_combined_6.png", 
-                            font_size=24, color=RED)
-            error_text.move_to(ORIGIN)
-            
-            placeholder = Rectangle(width=8, height=5, color=GRAY, fill_opacity=0.3)
-            placeholder.move_to(ORIGIN)
-            
-            self.play(FadeIn(placeholder), Write(error_text))
-            self.wait(3)
+        # except Exception as e:
+        #     # Fallback if image can't be loaded
+        #     error_text = Text(f"Error loading image: {str(e)}", 
+        #                     font_size=24, color=RED)
+        #     error_text.move_to(ORIGIN)
+        #     self.play(Write(error_text))
+        #     self.wait(2)
