@@ -46,6 +46,16 @@ class CelebAHQDemoSlide(Scene, DDPMBaseMixin):
         # Now show each slice individually
         current_slice = None
         
+        # Add source citation at bottom right
+        source_citation = Text(
+            "Generated samples on CelebA-HQ 256×256\nHo et al., \"Denoising Diffusion Probabilistic Models\" (2020)",
+            font_size=10,
+            color="#888888",  # Gray color
+            line_spacing=1.5
+        )
+        source_citation.to_corner(DOWN + RIGHT, buff=0.3)
+        self.add(source_citation)  # Add it to stay throughout the animation
+        
         for i, (slice_path, slice_data) in enumerate(zip(slice_paths, slice_info)):
             slice_name = slice_data["name"]
             
@@ -53,6 +63,19 @@ class CelebAHQDemoSlide(Scene, DDPMBaseMixin):
             slice_img = ImageMobject(slice_path)
             slice_img.scale_to_fit_height(4)
             slice_img.move_to(ORIGIN)
+            
+            # Add yellow frame around the image
+            frame = Rectangle(
+                width=slice_img.width + 0.2,  # Slightly larger than image
+                height=slice_img.height + 0.2,
+                stroke_color=YELLOW,
+                stroke_width=2,
+                fill_opacity=0  # No fill, just border
+            )
+            frame.move_to(slice_img.get_center())
+            
+            # Group the image and frame together
+            framed_slice = Group(slice_img, frame)
             
             # Create label for this slice
             slice_label = Text(f"{slice_name}", 
@@ -67,23 +90,23 @@ class CelebAHQDemoSlide(Scene, DDPMBaseMixin):
             if i == 0:
                 # slice_img.set_opacity(0)
                 self.play(
-                    FadeIn(slice_img),
+                    FadeIn(framed_slice),
                     run_time=1.5
                 )
             else:
                 # Subsequent slices: slide transition effect
-                slice_img.shift(RIGHT * 10)
+                framed_slice.shift(RIGHT * 10)
                 self.play(
                     current_slice.animate.shift(LEFT * 10),
-                    slice_img.animate.shift(LEFT * 10),
+                    framed_slice.animate.shift(LEFT * 10),
                     run_time=1.5
                 )
                 
             # Hold on each slice
-            self.wait(1.0)
+            self.wait(0.5)
             
             # Store current elements for next iteration
-            current_slice = slice_img
+            current_slice = framed_slice
         
             
         # Final flourish
@@ -92,7 +115,7 @@ class CelebAHQDemoSlide(Scene, DDPMBaseMixin):
             run_time=1
         )
         
-        self.wait(2)
+        self.wait(0.5)
             
         # Clean up temporary files
         import os
@@ -101,11 +124,3 @@ class CelebAHQDemoSlide(Scene, DDPMBaseMixin):
                 os.remove(slice_path)
             except:
                 pass
-                    
-        # except Exception as e:
-        #     # Fallback if image can't be loaded
-        #     error_text = Text(f"Error loading image: {str(e)}", 
-        #                     font_size=24, color=RED)
-        #     error_text.move_to(ORIGIN)
-        #     self.play(Write(error_text))
-        #     self.wait(2)
