@@ -12,35 +12,37 @@ Usage examples:
 - manim individual_scenes.py MathematicalFormulationSlideScene -ql
 - manim individual_scenes.py TrainingProcessSlideScene -ql
 - manim individual_scenes.py CelebAHQDemoSlideScene -ql
+- manim individual_scenes.py DDPMInnovationSlideScene -ql
 """
 
 from manim import *
-from ddpm_manim import TitleSlide, DiffusionIntroSlide, ProcessOverviewSlide, IntuitionSlide, ForwardDiffusionSlide, ReverseDenoisingSlide, MathematicalFormulationSlide, TrainingProcessSlide, CelebAHQDemoSlide
+from ddpm_manim import *
+
 
 # Create proper scene classes for individual rendering
-class TitleSlideScene(TitleSlide):
+class A_TitleSlideScene(TitleSlide):
     pass
 
-class DiffusionIntroSlideScene(DiffusionIntroSlide):
+
+class B_DiffusionIntroSlideScene(DiffusionIntroSlide):
     pass
+
+
+class C_CelebAHQDemoSlideScene(CelebAHQDemoSlide):
+    pass
+
+
+class D_DDPMInnovationSlideScene(DDPMInnovationSlide):
+    pass
+
 
 class ProcessOverviewSlideScene(ProcessOverviewSlide):
     pass
 
-class IntuitionSlideScene(IntuitionSlide):
-    pass
 
 class ForwardDiffusionSlideScene(ForwardDiffusionSlide):
     pass
 
+
 class ReverseDenoisingSlideScene(ReverseDenoisingSlide):
-    pass
-
-class MathematicalFormulationSlideScene(MathematicalFormulationSlide):
-    pass
-
-class TrainingProcessSlideScene(TrainingProcessSlide):
-    pass
-
-class CelebAHQDemoSlideScene(CelebAHQDemoSlide):
     pass
