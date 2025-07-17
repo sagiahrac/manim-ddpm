@@ -1,8 +1,6 @@
 from manim import *
 from manim.typing import Point3D
 import numpy as np
-from typing import List
-
 
 class DDPMBaseMixin:
     """Base mixin class with shared methods for all DDPM scenes"""
@@ -40,13 +38,16 @@ class DDPMBaseMixin:
         x_offset: int,
         y_offset: int,
         n_dots: int,
-        color: ManimColor | List[ManimColor] = WHITE,
     ):
         """Create a group of noise dots"""
         noise_group = Group()
         for _ in range(n_dots):
-            dot = Dot(radius=0.02, color=color)
-            dot.move_to([np.random.uniform(-1, 1), np.random.uniform(-1, 1), 0])
+            x = center[0] + np.random.uniform(-x_offset, x_offset)
+            y = center[1] + np.random.uniform(-y_offset, y_offset)
+            z = 0
+
+            dot = Dot(radius=0.02, color=random_bright_color())
+            dot.move_to([x, y, z])
             noise_group.add(dot)
         return noise_group
 

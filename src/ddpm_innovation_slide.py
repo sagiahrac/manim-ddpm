@@ -7,50 +7,63 @@ class DDPMInnovationSlide(Scene, DDPMBaseMixin):
     def construct(self):
         self.setup_3b1b_style()
 
-        # Title
-        title = Text(
-            "DDPM's Key Innovation",
-            font="TeX Gyre Termes",
-            font_size=40,
-            color="#DDA0DD",
-        )
-        title.to_edge(UP, buff=0.8)
-        self.play(Write(title))
-        self.wait(1)
-
         # Start with noisy corgi in the center
-        corgi_noisy = ImageMobject("media/images/corgi.png")
-        corgi_noisy.scale(0.15)
-        corgi_noisy.set_opacity(0.4)
+        corgi = ImageMobject("media/images/corgi.png")
+        corgi.scale(0.15)
+        corgi.set_opacity(0.4)
 
         # Add noise dots to noisy version
-        noise_group_1 = Group()
-        noise_group_2 = Group()
-        for i in range(60):
-            dot = Dot(radius=0.02, color=WHITE)
-            dot.move_to(
-                [
-                    corgi_noisy.get_center()[0] + np.random.uniform(-0.6, 0.6),
-                    corgi_noisy.get_center()[1] + np.random.uniform(-0.4, 0.4),
-                    0,
-                ]
-            )
-            if i < 30:
-                noise_group_1.add(dot)
-            else:
-                noise_group_2.add(dot)
-
-        corgi_noisy.move_to(ORIGIN + UP * 0.5)
-        noise_group_1.move_to(ORIGIN + UP * 0.5)
-        noise_group_2.move_to(ORIGIN + UP * 0.5)
-
-        # Label for noisy image
-        noisy_label = MathTex("x_t", font_size=24, color=WHITE)
-        noisy_label.next_to(noisy_corgi_with_noise, DOWN, buff=0.3)
+        noise_group = self.create_noise_group(
+            center=corgi.get_center(),
+            n_dots=25,
+            x_offset=corgi.get_width() * 0.4,
+            y_offset= corgi.get_height() * 0.4,
+        )
+        
+        extra_noise_group = self.create_noise_group(
+            center=corgi.get_center(),
+            n_dots=35,
+            x_offset=corgi.get_width() * 0.4,
+            y_offset= corgi.get_height() * 0.4,
+        )
+        
+        corgi_noisy = Group(corgi, noise_group, extra_noise_group)
+        corgi_noisy.move_to(ORIGIN + UP * 1.5)
 
         # Show the noisy image
-        self.play(FadeIn(noisy_corgi_with_noise), Write(noisy_label), run_time=1.5)
+        self.play(FadeIn(corgi_noisy), run_time=1.5)
         self.wait(1)
+        
+        # Separate the extra noise group and move it aside
+        corgi_denoised = Group(corgi.copy(), noise_group.copy())
+        corgi_denoised.move_to(DOWN * 1.5)
+        
+        # Down arrow to corgi denoised
+        down_arrow = Arrow(
+            corgi_noisy.get_bottom() + DOWN * 0.1,
+            corgi_denoised.get_top() + UP * 0.1,
+            color=WHITE,
+            stroke_width=3,
+        )
+        
+        self.play(Create(down_arrow), run_time=0.5)
+        self.play(FadeIn(corgi_denoised), run_time=0.5)
+
+
+        # self.play(
+        #     extra_noise_group.animate.shift(RIGHT * 2).scale(1.2),
+        #     corgi_noisy.animate.shift(LEFT * 2),
+        #     run_time=2
+        # )
+        
+        # # Add minus between them
+        # minus_sign = MathTex("-", font_size=40, color=WHITE)
+        # minus_center = (corgi_denoised.get_center() + extra_noise_group.get_center()) / 2
+        # minus_sign.move_to(minus_center)
+        # self.play(Write(minus_sign), run_time=1)
+        # self.wait(1)
+        
+        
 
         # # Create clean image and noise separately
         # corgi_clean = ImageMobject("media/images/corgi.png")
