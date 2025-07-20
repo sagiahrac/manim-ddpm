@@ -313,7 +313,7 @@ class ForwardDiffusionSlide(Scene, DDPMBaseMixin):
         
         # Add convergence to normal distribution
         convergence_arrow = MathTex(
-            "\\sim \\mathcal{N}(0, I)",
+            "\\xrightarrow[t \\to \\infty]{d} \\mathcal{N}(x_t; 0, I)",
             font_size=26,
             color=GRAY
         )
@@ -328,7 +328,7 @@ class ForwardDiffusionSlide(Scene, DDPMBaseMixin):
         
         # Create a framed box with the convergence formula
         convergence_formula = MathTex(
-            "x_T \\mathrel{\\dot{\\sim}} \\mathcal{N}(0, I)",
+            "x_T \\mathrel{\\dot{\\sim}} \\mathcal{N}(x_T; 0, I)",
             font_size=20,
             color=WHITE
         )
