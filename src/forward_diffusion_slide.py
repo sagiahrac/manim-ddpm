@@ -27,33 +27,39 @@ class ForwardDiffusionSlide(Scene, DDPMBaseMixin):
         self.setup_3b1b_style()
         
         # Load images
-        x0 = self.image_from_path(PATHS["x0"], scale=0.5)
-        x0 = self.framed_image(x0, color=YELLOW, buff=0.05)
+        x0_init = self.image_from_path(PATHS["x0"], scale=0.5)
+        x0_init = self.framed_image(x0_init, color=YELLOW, buff=0.05)
         
 
         # Start x0 with 0 opacity at the center
-        x0.move_to(ORIGIN).set_opacity(0)
-        
-        # Create the label
-        x0_label = MathTex("x_0", font_size=24, color=WHITE)
-        x0_label.move_to(LEFT * 4.5 + DOWN * 1.2)
+        x0_init.move_to(ORIGIN).set_opacity(0)
         
         # First: Fade in at center
-        self.play(x0.animate.set_opacity(1), run_time=1)
+        self.play(x0_init.animate.set_opacity(1), run_time=1)
         
         # Hold for 1 second
         self.wait(1)
         
         # Then: Move to left and scale down
-        self.play(
-            AnimationGroup(
-                x0.animate.move_to(LEFT * 4.5).scale(0.4),
-                Write(x0_label),
-                lag_ratio=0.3
-            ),
-            run_time=1.5
-        )
+        x0_target = LEFT * 4.5 + UP
+        self.play(x0_init.animate.move_to(x0_target).scale(0.4), run_time=1.5)
         
+        self.wait(0.3)
+        
+        x0 = self.image_from_path(PATHS["x0"], scale=0.2)
+        x0 = self.framed_image(x0, color=YELLOW, buff=0.05)
+        x0.move_to(x0_target)
+        
+        # Create the label
+        x0_label = MathTex("x_0", font_size=24, color=WHITE)
+        x0_label.next_to(x0, DOWN, buff=0.2)
+        
+        self.play(
+            Transform(x0_init, x0),
+            Write(x0_label),
+            run_time=0.5
+        )
+                
         self.wait(1)
         
         forward_label = Text("Forward\n Process", font_size=24, color=GREEN)
@@ -73,9 +79,9 @@ class ForwardDiffusionSlide(Scene, DDPMBaseMixin):
         xT = self.framed_image(xT, color=YELLOW, buff=0.05)
         
         # Position images
-        xt.move_to(LEFT * 1.5)
-        xtt.move_to(RIGHT * 1.5)
-        xT.move_to(RIGHT * 4.5)
+        xt.move_to(LEFT * 1.5 + UP)
+        xtt.move_to(RIGHT * 1.5 + UP)
+        xT.move_to(RIGHT * 4.5 + UP)
         
         # Create labels for each image
         xt_label = MathTex("x_{t-1}", font_size=24, color=WHITE)
