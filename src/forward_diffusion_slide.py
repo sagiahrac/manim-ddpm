@@ -78,10 +78,10 @@ class ForwardDiffusionSlide(Scene, DDPMBaseMixin):
         xT.move_to(RIGHT * 4.5)
         
         # Create labels for each image
-        xt_label = MathTex("x_t", font_size=24, color=WHITE)
+        xt_label = MathTex("x_{t-1}", font_size=24, color=WHITE)
         xt_label.next_to(xt, DOWN, buff=0.2)
         
-        xtt_label = MathTex("x_{t+1}", font_size=24, color=WHITE)
+        xtt_label = MathTex("x_t", font_size=24, color=WHITE)
         xtt_label.next_to(xtt, DOWN, buff=0.2)
         
         xT_label = MathTex("x_T", font_size=24, color=WHITE)
@@ -131,8 +131,8 @@ class ForwardDiffusionSlide(Scene, DDPMBaseMixin):
         
         self.wait(1)
         
-        # Create another framed text for q(x_{t+1}|x_t) in the middle of the arrow
-        transition_distribution = MathTex("q(x_{t+1}|x_t)", font_size=20, color=WHITE)
+        # Create another framed text for q(x_t}|x_{t-1}) in the middle of the arrow
+        transition_distribution = MathTex("q(x_t|x_{t-1})", font_size=20, color=WHITE)
         transition_frame = SurroundingRectangle(
             transition_distribution, 
             color=GREEN, 
@@ -178,4 +178,44 @@ class ForwardDiffusionSlide(Scene, DDPMBaseMixin):
             FadeIn(right_dots),
             run_time=1.0
         )
+        
+        self.wait(1)
+        
+        # Add the step-wise transition formula
+        step_formula = MathTex(
+            "q(x_t | x_{t-1}) = \\mathcal{N}(x_t; \\sqrt{1-\\beta_t} x_{t-1}, \\beta_t I)",
+            font_size=32,
+            color=WHITE
+        )
 
+        step_formula.move_to(DOWN * 2)
+        
+        
+        betas = MathTex(
+            "0 < \\beta_t \ll 1",
+            font_size=32, 
+            color=WHITE
+        )
+        
+        betas.next_to(step_formula, DOWN, buff=0.5)
+        
+        # Add the direct transition formula
+        # direct_formula = MathTex(
+        #     "q(x_t | x_0) = \\mathcal{N}(x_t; \\sqrt{\\bar{\\alpha}_t} x_0, (1-\\bar{\\alpha}_t) I)",
+        #     font_size=20,
+        #     color=WHITE
+        # )
+
+        # direct_formula.move_to(DOWN * 2.8)
+        
+        self.play(
+            FadeIn(step_formula),
+            run_time=1.5
+        )
+        
+        self.wait(0.5)
+        
+        self.play(
+            FadeIn(betas),
+            run_time=1.5
+        )
