@@ -111,11 +111,11 @@ class ForwardDiffusionSlide(Scene, DDPMBaseMixin):
         # Compute the right edge of the frame (not just the text)
         frame_right = x0_frame.get_right()
         # Extend the arrow a bit further to the right so it looks like it goes out of the frame
-        arrow_end = xT.get_center() + UP*1.5 + RIGHT * 1.2  # Increase RIGHT offset
+        right_arrow_end = xT.get_center() + UP*1.5 + RIGHT * 1.2  # Increase RIGHT offset
 
         right_arrow = Arrow(
             frame_right,
-            arrow_end,
+            right_arrow_end,
             color=GREEN,
             stroke_width=3,
             buff=0,  # No gap at start/end
@@ -328,7 +328,7 @@ class ForwardDiffusionSlide(Scene, DDPMBaseMixin):
         
         # Create a framed box with the convergence formula
         convergence_formula = MathTex(
-            "x_T \\mathrel{\\dot{\\sim}} \\mathcal{N}(x_T; 0, I)",
+            "x_T \\mathrel{\\dot{\\sim}} \\mathcal{N}(0, I)",
             font_size=20,
             color=WHITE
         )
@@ -348,5 +348,39 @@ class ForwardDiffusionSlide(Scene, DDPMBaseMixin):
         self.play(
             FadeTransform(convergence_arrow, convergence_framed),
             run_time=2.0
+        )
+        
+        self.wait(1)
+        
+        self.play(
+            FadeOut(direct_formula),
+            FadeOut(alpha_definition_part1),
+            FadeOut(alpha_definition_part2),
+            run_time=1
+        )
+        
+
+        left_arrow_end = x0.get_center() + DOWN * 1.75 + LEFT * 1.2
+        left_arrow_start = xT.get_right() + DOWN * 1.75 + 0.2 * LEFT
+        
+        left_arrow = Arrow(
+            left_arrow_start,
+            left_arrow_end,
+            color=RED,
+            stroke_width=3,
+            buff=0,  # No gap at start/end
+            max_tip_length_to_length_ratio=0.025  # Make tip smaller
+        )
+        
+        self.play(
+            Create(left_arrow),
+            run_time=1.5
+        )
+        
+        backward_label = Text("Backward\n  Process", font_size=24, color=RED)
+        backward_label.move_to(left_arrow_start + RIGHT + UP * 0.1)
+        self.play(
+            FadeIn(backward_label),
+            run_time=1.0
         )
         
