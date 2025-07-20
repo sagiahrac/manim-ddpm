@@ -2,97 +2,112 @@ from manim import *
 from .base import DDPMBaseMixin
 
 
+PATHS = {
+    "x0": "media/images/mnist/mnist-sample-2-clean.png",
+    "xt": "media/images/mnist/mnist-sample-2-little-noise.png",
+    "xtt": "media/images/mnist/mnist-sample-2-more-noise.png",
+    "xT": "media/images/mnist/mnist-sample-2-xT"
+}
+
 class ForwardDiffusionSlide(Scene, DDPMBaseMixin):
+    
+    def image_from_path(self, path, scale=0.2):
+        """Load an image from a given path and scale it."""
+        img = ImageMobject(path)
+        img.scale(scale)
+        return img
+    
+    def framed_image(self, image, color=YELLOW, buff=0.05):
+        """Create a framed image with a surrounding rectangle."""
+        frame = SurroundingRectangle(image, color=color, buff=buff)
+        framed_image = Group(image, frame)
+        return framed_image
+    
     def construct(self):
         self.setup_3b1b_style()
+        
+        # Load images
+        x0 = self.image_from_path(PATHS["x0"], scale=0.5)
+        x0 = self.framed_image(x0, color=YELLOW, buff=0.05)
+        
 
-        # Section title with 3B1B styling
-        title = Text(
-            "Forward Process: Adding Noise",
-            font="TeX Gyre Termes",
-            font_size=36,
-            color="#FFD700",
-        )
-        title.to_edge(UP, buff=0.8)
-        self.play(Write(title))
-
-        # Create smooth image representations
-        image_size = 1.2
-
-        # Original "image" - more sophisticated representation
-        original = self.create_image_representation(
-            BLUE_B, opacity=0.9, size=image_size
-        )
-        original.move_to(LEFT * 5)
-
-        # Label with mathematical notation
+        # Start x0 with 0 opacity at the center
+        x0.move_to(ORIGIN).set_opacity(0)
+        
+        # Create the label
         x0_label = MathTex("x_0", font_size=24, color=WHITE)
-        x0_label.next_to(original, DOWN, buff=0.3)
-
-        self.play(FadeIn(original, scale=0.8), Write(x0_label))
-
-        # Create noise progression with smooth transitions
-        images = [original]
-        labels = [x0_label]
-
-        positions = [LEFT * 3, LEFT * 1, RIGHT * 1, RIGHT * 3, RIGHT * 5]
-        noise_levels = [0.2, 0.4, 0.6, 0.8, 1.0]
-
-        for i, (pos, noise) in enumerate(zip(positions, noise_levels)):
-            # Create increasingly noisy image
-            noisy_img = self.tmp_create_noisy_image(noise, size=image_size)
-            noisy_img.move_to(pos)
-
-            # Mathematical label
-            label = MathTex(f"x_{{{i + 1}}}", font_size=24, color=WHITE)
-            label.next_to(noisy_img, DOWN, buff=0.3)
-
-            # Smooth curved arrow
-            arrow = CurvedArrow(
-                images[-1].get_right() + RIGHT * 0.1,
-                noisy_img.get_left() + LEFT * 0.1,
-                color="#FF6B6B",
-                stroke_width=3,
-            )
-
-            # Add noise equation above arrow
-            if i == 0:
-                noise_eq = MathTex(r"+\varepsilon", font_size=20, color="#FF6B6B")
-                noise_eq.next_to(arrow, UP, buff=0.1)
-                self.play(
-                    Create(arrow),
-                    FadeIn(noisy_img, scale=0.8),
-                    Write(label),
-                    Write(noise_eq),
-                    run_time=1.5,
-                )
-            else:
-                self.play(
-                    Create(arrow),
-                    FadeIn(noisy_img, scale=0.8),
-                    Write(label),
-                    run_time=1.2,
-                )
-
-            images.append(noisy_img)
-            labels.append(label)
-
-        # Mathematical formulation
-        forward_eq = MathTex(
-            r"q(x_t|x_{t-1}) = \mathcal{N}(\sqrt{1-\beta_t}x_{t-1}, \beta_t I)",
-            font_size=32,
-            color="#87CEEB",
+        x0_label.move_to(LEFT * 4.5 + DOWN * 1.2)
+        
+        # First: Fade in at center
+        self.play(x0.animate.set_opacity(1), run_time=1)
+        
+        # Hold for 1 second
+        self.wait(1)
+        
+        # Then: Move to left and scale down
+        self.play(
+            AnimationGroup(
+                x0.animate.move_to(LEFT * 4.5).scale(0.4),
+                Write(x0_label),
+                lag_ratio=0.3
+            ),
+            run_time=1.5
         )
-        forward_eq.to_edge(DOWN, buff=1)
+        
+        self.wait(1)
+        
+        forward_label = Text("Forward\n Process", font_size=24, color=GREEN)
+        forward_label.next_to(x0, UP + LEFT * 0.4, buff=0.5)
+        
+        self.play(FadeIn(forward_label))
 
-        # Highlight the key parts
-        self.play(Write(forward_eq))
-
-        # Add explanation box
-        explanation = Text(
-            "Each step adds Gaussian noise", font_size=20, color="#B0B0B0"
+        
+        
+        xt = self.image_from_path(PATHS["xt"], scale=0.2)
+        xtt = self.image_from_path(PATHS["xtt"], scale=0.2)
+        xT = self.image_from_path(PATHS["xT"], scale=0.2)
+        
+        # Add yellow frames to each image
+        xt = self.framed_image(xt, color=YELLOW, buff=0.05)
+        xtt = self.framed_image(xtt, color=YELLOW, buff=0.05)
+        xT = self.framed_image(xT, color=YELLOW, buff=0.05)
+        
+        # Position images
+        xt.move_to(LEFT * 1.5)
+        xtt.move_to(RIGHT * 1.5)
+        xT.move_to(RIGHT * 4.5)
+        
+        # Create labels for each image
+        xt_label = MathTex("x_t", font_size=24, color=WHITE)
+        xt_label.next_to(xt, DOWN, buff=0.2)
+        
+        xtt_label = MathTex("x_{t+1}", font_size=24, color=WHITE)
+        xtt_label.next_to(xtt, DOWN, buff=0.2)
+        
+        xT_label = MathTex("x_T", font_size=24, color=WHITE)
+        xT_label.next_to(xT, DOWN, buff=0.2)
+        
+        # Show images with labels using lag_ratio for staggered appearance
+        right_arrow = Arrow(
+            x0.get_center() + UP*1.5 + LEFT * 0.4,
+            xT.get_center() + UP*1.5 + RIGHT * 0.4,
+            color=GREEN,
+            stroke_width=3,
         )
-        explanation.next_to(forward_eq, UP, buff=0.3)
-        self.play(Write(explanation))
-
-        self.wait(3)
+            
+        self.play(
+            Write(right_arrow),
+            AnimationGroup(
+                FadeIn(xt),
+                Write(xt_label),
+                FadeIn(xtt),
+                Write(xtt_label),
+                FadeIn(xT),
+                Write(xT_label),
+                lag_ratio=0.3
+            ),
+            run_time=1.5
+        )
+        
+        
+        
