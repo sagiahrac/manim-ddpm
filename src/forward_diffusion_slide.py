@@ -112,7 +112,8 @@ class ForwardDiffusionSlide(Scene, DDPMBaseMixin):
             arrow_end,
             color=GREEN,
             stroke_width=3,
-            buff=0  # No gap at start/end
+            buff=0,  # No gap at start/end
+            max_tip_length_to_length_ratio=0.025  # Make tip smaller
         )
         self.play(
             FadeIn(x0_framed_text),
@@ -198,13 +199,6 @@ class ForwardDiffusionSlide(Scene, DDPMBaseMixin):
         )
         
         betas.next_to(step_formula, DOWN, buff=0.5)
-        
-        # Add the direct transition formula
-        # direct_formula = MathTex(
-        #     "q(x_t | x_0) = \\mathcal{N}(x_t; \\sqrt{\\bar{\\alpha}_t} x_0, (1-\\bar{\\alpha}_t) I)",
-        #     font_size=20,
-        #     color=WHITE
-        # )
 
         # direct_formula.move_to(DOWN * 2.8)
         
@@ -229,6 +223,8 @@ class ForwardDiffusionSlide(Scene, DDPMBaseMixin):
             run_time=1.0
         )
         
+        self.wait(0.5)
+        
         self.play(
             step_formula[0][16:22].animate.scale(0.7),
             run_time=0.8
@@ -251,3 +247,100 @@ class ForwardDiffusionSlide(Scene, DDPMBaseMixin):
             step_formula[0][27:29].animate.set_color(WHITE),  # Reset color
             run_time=1.0
         )
+        
+        self.wait(1)
+        
+        # Fade out the step formula and betas
+        self.play(
+            FadeOut(step_formula),
+            FadeOut(betas),
+            run_time=1.5
+        )
+        
+        self.wait(0.5)
+        
+        # Add the direct transition formula
+        direct_formula = MathTex(
+            "q(x_t | x_0) = \\mathcal{N}(x_t; \\sqrt{\\bar{\\alpha}_t} x_0, (1-\\bar{\\alpha}_t) I)",
+            font_size=32,
+            color=WHITE
+        )
+        direct_formula.move_to(DOWN * 2)
+        
+        # Fade in the direct formula
+        self.play(
+            FadeIn(direct_formula),
+            run_time=1.5
+        )
+        
+        self.wait(1)
+        
+        # Add definition of alpha bar (first part only)
+        alpha_definition_part1 = MathTex(
+            "\\bar{\\alpha}_t = \\prod_{s=1}^{t}(1-\\beta_s)",
+            font_size=28,
+            color=WHITE
+        )
+        alpha_definition_part1.next_to(direct_formula, DOWN, buff=0.5)
+        
+        # Add the arrow and limit (second part)
+        alpha_definition_part2 = MathTex(
+            "\\xrightarrow[t \\to \\infty]{} 0",
+            font_size=28,
+            color=WHITE
+        )
+        alpha_definition_part2.next_to(alpha_definition_part1, RIGHT, buff=0.1)
+        
+        self.play(
+            FadeIn(alpha_definition_part1),
+            run_time=1.5
+        )
+        
+        self.wait(1)
+        
+        self.play(
+            FadeIn(alpha_definition_part2),
+            run_time=1.5
+        )
+        
+        self.wait(1)
+        
+        # Add convergence to normal distribution
+        convergence_arrow = MathTex(
+            "\\sim \\mathcal{N}(0, I)",
+            font_size=26,
+            color=GRAY
+        )
+        convergence_arrow.next_to(direct_formula, RIGHT, buff=0.3)
+        
+        self.play(
+            FadeIn(convergence_arrow),
+            run_time=1.5
+        )
+        
+        self.wait(1)
+        
+        # Create a framed box with the convergence formula
+        convergence_formula = MathTex(
+            "x_T \\mathrel{\\dot{\\sim}} \\mathcal{N}(0, I)",
+            font_size=20,
+            color=WHITE
+        )
+        convergence_frame = SurroundingRectangle(
+            convergence_formula,
+            color=GREEN,
+            buff=0.12,
+            fill_opacity=1.0,
+            fill_color=self.camera.background_color,
+            stroke_width=3
+        )
+        convergence_framed = VGroup(convergence_frame, convergence_formula)
+        
+        # Position it above X_T image
+        convergence_framed.move_to(xT.get_center() + UP * 1.5)
+        
+        self.play(
+            FadeTransform(convergence_arrow, convergence_framed),
+            run_time=2.0
+        )
+        
