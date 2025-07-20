@@ -219,3 +219,35 @@ class ForwardDiffusionSlide(Scene, DDPMBaseMixin):
             FadeIn(betas),
             run_time=1.5
         )
+        
+        self.wait(1)
+        
+        # Highlight and emphasize the √(1-β_t) term
+        # Animation sequence: highlight, enlarge, then return to normal
+        self.play(
+            step_formula[0][16:26].animate.set_color(GREEN),  # Highlight just the √(1-β_t) part
+            run_time=1.0
+        )
+        
+        self.play(
+            step_formula[0][16:22].animate.scale(0.7),
+            run_time=0.8
+        )
+        
+        self.play(
+            step_formula[0][16:22].animate.scale(1/0.7),
+            run_time=0.8
+        )
+        
+        self.play(
+            step_formula[0][16:26].animate.set_color(WHITE),  # Highlight just the √(1-β_t) part
+            step_formula[0][27:29].animate.set_color(GREEN),  # Highlight just the β_t part
+            run_time=1.0
+        )
+        
+        self.wait(1)
+        
+        self.play(
+            step_formula[0][27:29].animate.set_color(WHITE),  # Reset color
+            run_time=1.0
+        )
