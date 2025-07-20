@@ -4,6 +4,7 @@ import numpy as np
 
 
 class DDPMInnovationSlide(Scene, DDPMBaseMixin):
+    
     def construct(self):
         self.setup_3b1b_style()
 
@@ -29,32 +30,110 @@ class DDPMInnovationSlide(Scene, DDPMBaseMixin):
         
         corgi_noisy = Group(corgi, noise_group, extra_noise_group)
         corgi_noisy.move_to(ORIGIN + UP * 1.5)
+        
+        noisy_label = MathTex("x_t", font_size=24, color=WHITE)
+        noisy_label.next_to(corgi_noisy, DOWN, buff=0.2)
+        
+        noisy_corgy_anim = AnimationGroup(
+            FadeIn(corgi_noisy),
+            Write(noisy_label),
+            lag_ratio=1,
+            run_time=1.5
+        )
 
         # Show the noisy image
-        self.play(FadeIn(corgi_noisy), run_time=1.5)
-        self.wait(1)
+        self.play(noisy_corgy_anim)
         
         # Separate the extra noise group and move it aside
         corgi_denoised = Group(corgi.copy(), noise_group.copy())
         corgi_denoised.move_to(DOWN * 1.5)
         
-        # Down arrow to corgi denoised
+        denoised_label = MathTex("x_{t-1}", font_size=24, color=WHITE)
+        denoised_label.next_to(corgi_denoised, DOWN, buff=0.2)
+        
         down_arrow = Arrow(
-            corgi_noisy.get_bottom() + DOWN * 0.1,
-            corgi_denoised.get_top() + UP * 0.1,
+            corgi_noisy.get_bottom() + DOWN * 0.3,
+            corgi_denoised.get_top() + UP * 0.2,
             color=WHITE,
             stroke_width=3,
         )
+
+        corgi_denoised_anim = AnimationGroup(
+            Create(down_arrow),
+            FadeIn(corgi_denoised),
+            Write(denoised_label),
+            lag_ratio=1,
+            run_time=2.5
+        )
         
-        self.play(Create(down_arrow), run_time=0.5)
-        self.play(FadeIn(corgi_denoised), run_time=0.5)
+        self.play(corgi_denoised_anim)
+        
+        noisy_corgy_anim = AnimationGroup(
+            FadeIn(corgi_noisy),
+            Write(noisy_label),
+            lag_ratio=1,
+            run_time=1.5
+        )
+
+        noise_only = extra_noise_group.copy()
+        
 
 
+        separate_noise_anim = AnimationGroup(
+            noise_only.animate.shift(RIGHT * 2).scale(1.2),
+            corgi_noisy.animate.shift(LEFT * 2),
+            noisy_label.animate.shift(LEFT * 2),
+            run_time=2
+        )
+        
+        self.play(
+            separate_noise_anim
+        )
+
+        minus_sign = MathTex("-", font_size=40, color=WHITE)
+        minus_sign.move_to((corgi_noisy.get_center() + noise_only.get_center()) / 2)
+        noise_label = MathTex(r"\epsilon", font_size=24, color=WHITE)
+        noise_label.next_to(noise_only, DOWN, buff=0.2)
+        
+        
+        self.play(Write(noise_label), Write(minus_sign))
+        
+        self.play(
+            *[FadeOut(mob)for mob in self.mobjects]
+        )
+        # All Fade Out
+        
+
+        # Show the clean image
+        # self.play(FadeIn(corgi.copy().move_to(ORIGIN + DOWN * 1.5)))
+
+        # # Down arrow to corgi denoised
+        # down_arrow = Arrow(
+        #     corgi_noisy.get_bottom() + DOWN * 0.3,
+        #     corgi_denoised.get_top() + UP * 0.2,
+        #     color=WHITE,
+        #     stroke_width=3,
+        # )
+        
+        # self.play(Create(down_arrow), run_time=0.5)
         # self.play(
-        #     extra_noise_group.animate.shift(RIGHT * 2).scale(1.2),
+        #     FadeIn(corgi_denoised), 
+        #     Write(denoised_label),
+        #     run_time=1.5
+        # )
+        
+        # self.wait(1)
+        
+        #             # MoveToTarget(extra_noise_group),
+        #     # Write(noise_label),
+        # extra_noise_group_copy = extra_noise_group.copy()
+        # self.play(
+        #     extra_noise_group_copy.animate.shift(RIGHT * 2).scale(1.2),
         #     corgi_noisy.animate.shift(LEFT * 2),
         #     run_time=2
         # )
+        
+        
         
         # # Add minus between them
         # minus_sign = MathTex("-", font_size=40, color=WHITE)
@@ -89,8 +168,7 @@ class DDPMInnovationSlide(Scene, DDPMBaseMixin):
         # clean_label = MathTex("x_0", font_size=24, color=WHITE)
         # clean_label.next_to(corgi_clean, DOWN, buff=0.3)
 
-        # noise_label = MathTex(r"\epsilon", font_size=24, color="#32CD32")
-        # noise_label.next_to(noise_only, DOWN, buff=0.3)
+
 
         # self.play(
         #     Write(clean_label),
