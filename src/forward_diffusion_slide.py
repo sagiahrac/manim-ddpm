@@ -87,15 +87,35 @@ class ForwardDiffusionSlide(Scene, DDPMBaseMixin):
         xT_label = MathTex("x_T", font_size=24, color=WHITE)
         xT_label.next_to(xT, DOWN, buff=0.2)
         
-        # Show images with labels using lag_ratio for staggered appearance
+        # Create framed text for x_0 ~ q(x_0) at the left tip of the arrow
+        x0_distribution = MathTex("x_0 \\sim q(x_0)", font_size=22, color=WHITE)
+        x0_frame = SurroundingRectangle(
+            x0_distribution, 
+            color=GREEN, 
+            buff=0.15,
+            fill_opacity=1.0,
+            fill_color=self.camera.background_color,
+            stroke_width=3
+        )
+        x0_framed_text = VGroup(x0_frame, x0_distribution)  # Frame first, then text on top
+        
+        # Position it at the left tip of the arrow (overlapping)
+        x0_framed_text.move_to(x0.get_center() + UP*1.5)  # Slightly to the left of arrow start
+
+        # Compute the right edge of the frame (not just the text)
+        frame_right = x0_frame.get_right()
+        # Extend the arrow a bit further to the right so it looks like it goes out of the frame
+        arrow_end = xT.get_center() + UP*1.5 + RIGHT * 1.2  # Increase RIGHT offset
+
         right_arrow = Arrow(
-            x0.get_center() + UP*1.5 + LEFT * 0.4,
-            xT.get_center() + UP*1.5 + RIGHT * 0.4,
+            frame_right,
+            arrow_end,
             color=GREEN,
             stroke_width=3,
+            buff=0  # No gap at start/end
         )
-            
         self.play(
+            FadeIn(x0_framed_text),
             Write(right_arrow),
             AnimationGroup(
                 FadeIn(xt),
@@ -109,5 +129,53 @@ class ForwardDiffusionSlide(Scene, DDPMBaseMixin):
             run_time=1.5
         )
         
+        self.wait(1)
         
+        # Create another framed text for q(x_{t+1}|x_t) in the middle of the arrow
+        transition_distribution = MathTex("q(x_{t+1}|x_t)", font_size=20, color=WHITE)
+        transition_frame = SurroundingRectangle(
+            transition_distribution, 
+            color=GREEN, 
+            buff=0.12,
+            fill_opacity=1.0,
+            fill_color=self.camera.background_color,
+            stroke_width=3
+        )
+        transition_framed_text = VGroup(transition_frame, transition_distribution)
         
+        # Position it in the middle between xt and xtt images at arrow height
+        middle_position = (xt.get_center() + xtt.get_center()) / 2 + UP*1.5
+        transition_framed_text.move_to(middle_position)
+        
+        forward_step_arrow = Arrow(
+            xt.get_right() + UP * 0.1,
+            xtt.get_left() + UP * 0.1,
+            color=GREEN,
+            stroke_width=3,
+            buff=0.2,
+            max_tip_length_to_length_ratio=0.15  # Make tip smaller
+        )
+        
+        # Add dots to show progression between images
+        # Dots between x0 and xt
+        left_dots = VGroup()
+        for i in range(3):
+            dot = Dot(color=WHITE, radius=0.03)
+            dot.move_to((x0.get_center() + xt.get_center()) / 2 + LEFT * 0.3 + RIGHT * i * 0.2)
+            left_dots.add(dot)
+        
+        # Dots between xtt and xT  
+        right_dots = VGroup()
+        for i in range(3):
+            dot = Dot(color=WHITE, radius=0.03)
+            dot.move_to((xtt.get_center() + xT.get_center()) / 2 + LEFT * 0.3 + RIGHT * i * 0.2)
+            right_dots.add(dot)
+        
+        self.play(
+            FadeIn(transition_framed_text),
+            Create(forward_step_arrow),
+            FadeIn(left_dots),
+            FadeIn(right_dots),
+            run_time=1.0
+        )
+
