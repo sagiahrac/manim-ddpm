@@ -384,3 +384,69 @@ class ForwardDiffusionSlide(Scene, DDPMBaseMixin):
             run_time=1.0
         )
         
+        # Add red framed text for x_0 ~ p_θ(x_0) below x_0 image
+        x0_backward_distribution = MathTex("x_0 \\sim p_{\\theta}(x_0)", font_size=20, color=WHITE)
+        x0_backward_frame = SurroundingRectangle(
+            x0_backward_distribution, 
+            color=RED, 
+            buff=0.12,
+            fill_opacity=1.0,
+            fill_color=self.camera.background_color,
+            stroke_width=3
+        )
+        x0_backward_framed = VGroup(x0_backward_frame, x0_backward_distribution)
+        
+        # Position it below x_0 image at the same height as the backward arrow
+        x0_backward_framed.move_to(x0.get_center() + DOWN * 1.75)
+        
+        # Add red framed text for p_θ(x_{t-1}|x_t) in the middle of backward arrow
+        backward_transition = MathTex("p_{\\theta}(x_{t-1}|x_t)", font_size=18, color=WHITE)
+        backward_transition_frame = SurroundingRectangle(
+            backward_transition, 
+            color=RED, 
+            buff=0.10,
+            fill_opacity=1.0,
+            fill_color=self.camera.background_color,
+            stroke_width=3
+        )
+        backward_transition_framed = VGroup(backward_transition_frame, backward_transition)
+        
+        backward_transition_framed.move_to([0, x0_backward_framed.get_center()[1], 0])
+        
+        self.play(
+            FadeIn(x0_backward_framed),
+            FadeIn(backward_transition_framed),
+            run_time=1.0
+        )
+        
+        self.wait(1)
+        
+        # Add the backward process formula
+        backward_formula = MathTex(
+            "p_{\\theta}(x_{t-1} | x_t) := \\mathcal{N}(x_{t-1}; \\mu_{\\theta}(x_t, t), \\Sigma_{\\theta}(x_t, t))",
+            font_size=28,
+            color=WHITE
+        )
+        backward_formula.move_to(DOWN * 2.5)
+        
+        self.play(
+            FadeIn(backward_formula),
+            run_time=1.5
+        )
+        
+        self.wait(0.5)
+        
+        # Add curly brace and "Decoder" label under p_θ(x_{t-1} | x_t)
+        decoder_brace = Brace(backward_formula[0][0:11], DOWN, buff=0.05, stroke_width=0.1)
+        decoder_label = decoder_brace.get_text("Decoder")
+        decoder_label.scale(0.7)  # Make it even smaller
+        decoder_label.set_color(WHITE)
+        decoder_label.shift(UP * 0.15)  # Move text closer to the brace
+        
+        self.play(
+            GrowFromCenter(decoder_brace),
+            Write(decoder_label),
+            run_time=1.0
+        )
+        
+        
