@@ -22,22 +22,10 @@ class DiffusionIntroSlide(Scene, DDPMBaseMixin):
         )
         gan_text = Text("GANs", font_size=20, color=WHITE)
         gan_text.move_to(gan_box)
+        
         gan_group = VGroup(gan_box, gan_text).move_to(LEFT * 3)
 
-        # VAEs
-        vae_box = RoundedRectangle(
-            width=1.5,
-            height=0.8,
-            corner_radius=0.1,
-            fill_color="#87CEEB",
-            fill_opacity=0.3,
-            stroke_color="#87CEEB",
-        )
-        vae_text = Text("VAEs", font_size=20, color=WHITE)
-        vae_text.move_to(vae_box)
-        vae_group = VGroup(vae_box, vae_text).move_to(ORIGIN)
-
-        # Diffusion Models (highlighted)
+        # Diffusion Models (highlighted) - now in the middle
         diff_box = RoundedRectangle(
             width=1.8,
             height=0.8,
@@ -49,21 +37,61 @@ class DiffusionIntroSlide(Scene, DDPMBaseMixin):
         )
         diff_text = Text("Diffusion\nModels", font_size=18, color=BLACK, weight=BOLD)
         diff_text.move_to(diff_box)
-        diff_group = VGroup(diff_box, diff_text).move_to(RIGHT * 3)
+        
+        diff_group = VGroup(diff_box, diff_text).move_to(ORIGIN)
+
+        # VAEs - now on the right
+        vae_box = RoundedRectangle(
+            width=1.5,
+            height=0.8,
+            corner_radius=0.1,
+            fill_color="#87CEEB",
+            fill_opacity=0.3,
+            stroke_color="#87CEEB",
+        )
+        vae_text = Text("VAEs", font_size=20, color=WHITE)
+        vae_text.move_to(vae_box)
+        
+        vae_group = VGroup(vae_box, vae_text).move_to(RIGHT * 3)
 
         models_group.add(gan_group, vae_group, diff_group) 
 
-        self.play(FadeIn(gan_group), run_time=0.8)
-        self.play(FadeIn(vae_group), run_time=0.8)
-        self.play(FadeIn(diff_group), run_time=1.2)  # Emphasize diffusion models
+        self.play(FadeIn(diff_group), run_time=1.2)  # Diffusion models appear first
+        self.wait(2.7)
+        self.play(FadeIn(gan_group), run_time=0.8)   # Then GANs
+        self.play(FadeIn(vae_group), run_time=0.8)   # Finally VAEs
 
         # Highlight diffusion models
-        self.play(diff_group.animate.scale(1.2), run_time=0.8)
-        self.play(diff_group.animate.scale(1 / 1.2), run_time=0.8)
-        self.wait(1)
+        # self.play(diff_group.animate.scale(1.2), run_time=0.8)
+        # self.play(diff_group.animate.scale(1 / 1.2), run_time=0.8)
 
-        # Clear and transition to next concept
-        self.play(FadeOut(models_group))
+        # Diffusion box "kicks" the other boxes off screen
+        # Since diffusion is now in the center, it will kick both directions
+        # First, diffusion box prepares - slight scale up
+        self.play(diff_group.animate.scale(1.1), run_time=0.4)
+        
+        # Quick "wind up" animation - diffusion box rotates slightly
+        self.play(diff_group.animate.rotate(0.15), run_time=0.3)
+        
+        # The kick! Diffusion box expands/pulses while others get pushed off
+        kick_animations = [
+            diff_group.animate.scale(1.3).rotate(-0.15),      # Diffusion expands from center
+            gan_group.animate.shift(LEFT * 10).rotate(2),     # GAN flies off left with spin
+            vae_group.animate.shift(RIGHT * 10).rotate(-2)    # VAE flies off right with spin
+        ]
+        self.play(*kick_animations, run_time=0.8)
+        
+        # Diffusion box settles back to normal size
+        self.play(diff_group.animate.scale(1/1.3), run_time=0.3)
+        
+        # Victory pose - slight scale up and down
+        self.play(diff_group.animate.scale(1.1), run_time=0.4)
+        self.play(diff_group.animate.scale(1/1.1), run_time=0.4)
+        
+        # Now fade out the diffusion box
+        self.play(FadeOut(diff_group), run_time=0.8)
+
+        self.wait(1)
 
         # Visual: "that aim to generate samples from complex data distributions"
         # Show complex data distribution
@@ -169,3 +197,13 @@ class DiffusionIntroSlide(Scene, DDPMBaseMixin):
         self.play(Write(new_label))
 
         self.wait(2)
+
+        # Fade out all elements
+        self.play(
+            FadeOut(complex_dist),
+            FadeOut(original_label),
+            FadeOut(arrow),
+            FadeOut(learning_text),
+            FadeOut(new_samples),
+            FadeOut(new_label),
+        )
