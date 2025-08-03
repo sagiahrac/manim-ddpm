@@ -6,19 +6,9 @@ class DiffusionIntroSlide(Scene, DDPMBaseMixin):
     def construct(self):
         self.setup_3b1b_style()
 
-        # Title
-        title = Text(
-            "What is a Diffusion Model?",
-            font="TeX Gyre Termes",
-            font_size=40,
-            color="#DDA0DD",
-        )
-        title.to_edge(UP, buff=0.8)
-        self.play(Write(title))
-        self.wait(1)
+        self.add_sound("/Users/sagi/Music/GarageBand/B.m4a")
+        # self.wait(10)
 
-        # Visual: "Diffusion models are a type of generative model"
-        # Show different types of generative models
         models_group = VGroup()
 
         # GANs
@@ -61,16 +51,8 @@ class DiffusionIntroSlide(Scene, DDPMBaseMixin):
         diff_text.move_to(diff_box)
         diff_group = VGroup(diff_box, diff_text).move_to(RIGHT * 3)
 
-        models_group.add(gan_group, vae_group, diff_group)
+        models_group.add(gan_group, vae_group, diff_group) 
 
-        # Label for generative models
-        gen_label = Text(
-            "Generative Models", font_size=24, color="#DDA0DD", weight=BOLD
-        )
-        gen_label.next_to(models_group, UP, buff=0.5)
-
-        # Animate the appearance of generative models
-        self.play(Write(gen_label))
         self.play(FadeIn(gan_group), run_time=0.8)
         self.play(FadeIn(vae_group), run_time=0.8)
         self.play(FadeIn(diff_group), run_time=1.2)  # Emphasize diffusion models
@@ -81,7 +63,7 @@ class DiffusionIntroSlide(Scene, DDPMBaseMixin):
         self.wait(1)
 
         # Clear and transition to next concept
-        self.play(FadeOut(models_group), FadeOut(gen_label))
+        self.play(FadeOut(models_group))
 
         # Visual: "that aim to generate samples from complex data distributions"
         # Show complex data distribution
@@ -117,11 +99,6 @@ class DiffusionIntroSlide(Scene, DDPMBaseMixin):
 
         complex_dist.move_to(ORIGIN)
 
-        dist_label = Text("Complex Data Distribution", font_size=28, color="#87CEEB")
-        dist_label.to_edge(DOWN, buff=1)
-
-        # Animate the complex distribution appearing
-        self.play(Write(dist_label))
         self.play(
             LaggedStart(
                 *[FadeIn(point, scale=0.5) for point in complex_dist],
@@ -134,7 +111,6 @@ class DiffusionIntroSlide(Scene, DDPMBaseMixin):
 
         # Visual: "learn to create realistic new data that looks like the data they were trained on"
         # Show generation process
-        self.play(FadeOut(dist_label))
 
         # Move original data to left
         self.play(complex_dist.animate.move_to(LEFT * 3).scale(0.7))
@@ -191,12 +167,5 @@ class DiffusionIntroSlide(Scene, DDPMBaseMixin):
         new_label = Text("Generated Data", font_size=20, color="#90EE90")
         new_label.next_to(new_samples, DOWN, buff=0.3)
         self.play(Write(new_label))
-
-        # Emphasize similarity
-        similarity_text = Text(
-            "Realistic & Similar!", font_size=24, color="#FFD700", weight=BOLD
-        )
-        similarity_text.to_edge(DOWN, buff=0.5)
-        self.play(Write(similarity_text))
 
         self.wait(2)

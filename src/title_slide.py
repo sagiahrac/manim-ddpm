@@ -5,6 +5,7 @@ from .base import DDPMBaseMixin
 class TitleSlide(Scene, DDPMBaseMixin):
     def construct(self):
         self.setup_3b1b_style()
+        self.add_sound("/Users/sagi/Music/GarageBand/A.m4a")
 
         # 3B1B style title with elegant typography
         title = Text(
@@ -52,9 +53,22 @@ class TitleSlide(Scene, DDPMBaseMixin):
         presenter.next_to(course, DOWN, buff=0.3)
 
         # Smooth 3B1B style animations
+        self.wait(1.5)
+        self.play(Write(presenter, run_time=0.75))
+        self.wait(3.5)
         self.play(
             Write(title, run_time=1.5), Write(subtitle, run_time=1.5), lag_ratio=0.1
         )
-        self.play(Create(underline))
-        self.play(Write(authors), Write(course), Write(presenter), lag_ratio=0.2)
-        self.wait(3)
+        self.play(Create(underline), FadeIn(authors), FadeIn(course))
+        self.wait(1)
+
+        # Fade out all elements
+        self.play(
+            FadeOut(title),
+            FadeOut(subtitle),
+            FadeOut(underline),
+            FadeOut(authors),
+            FadeOut(course),
+            FadeOut(presenter),
+        )
+
