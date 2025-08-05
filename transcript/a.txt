@@ -1,0 +1,1 @@
+"Hi, I'm Sagi Ahrac, and in this presentation I’ll explore the 2020 paper ‘Denoising Diffusion Probabilistic Models’

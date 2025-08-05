@@ -1,0 +1,2 @@
+"The paper proposes a generative framework—alongside earlier models like GANs and VAEs, which had dominated the field until then. This framework is designed for modeling complex data distributions, such as images. It is trained on real data to learn the structure of the distribution. Once trained, the goal is to generate new samples that resemble those from the original dataset."
+

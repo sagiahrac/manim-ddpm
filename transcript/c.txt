@@ -1,0 +1,3 @@
+“On the practical side, the DDPM paper was the first to show that diffusion models can match — and sometimes even slightly outperform — GANs in sample quality."
+“So what changed?”
+“Well — to see that, let’s first understand the foundations behind diffusion models, and how they turn noise into data.”
