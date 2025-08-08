@@ -5,3 +5,5 @@ from .forward_diffusion_slide import ForwardDiffusionSlide
 from .reverse_denoising_slide import ReverseDenoisingSlide
 from .celebahq_demo_slide import CelebAHQDemoSlide
 from .ddpm_innovation_slide import DDPMInnovationSlide
+from .density_evolution_slide import DensityEvolutionSlide
+from .three_gaussians_3d import ThreeGaussians3D
