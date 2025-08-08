@@ -111,7 +111,20 @@ class CelebAHQDemoSlide(Scene, DDPMBaseMixin):
         # Final flourish
         self.play(FadeOut(current_slice), run_time=1)
 
-        self.wait(0.5)
+
+        # text "so what changed?"
+
+        question_text = Text(            "So what changed?",
+            font="TeX Gyre Termes",
+            font_size=48,
+            color=WHITE,
+            weight=BOLD,
+        )
+
+
+        self.play(Write(question_text, run_time=0.75))
+        self.wait(2)
+        self.play(FadeOut(question_text))
 
         # Clean up temporary files
         import os

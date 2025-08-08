@@ -16,7 +16,8 @@ Usage examples:
 """
 
 from manim import *
-from ddpm_manim import *
+from src import *
+from src.three_gaussians_3d import ThreeGaussians3D
 
 
 # Create proper scene classes for individual rendering
@@ -45,4 +46,10 @@ class ForwardDiffusionSlideScene(ForwardDiffusionSlide):
 
 
 class ReverseDenoisingSlideScene(ReverseDenoisingSlide):
+    pass
+
+class DensityEvolutionSlideScene(DensityEvolutionSlide):
+    pass
+
+class ThreeGaussians3DScene(ThreeGaussians3D):
     pass
