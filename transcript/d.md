@@ -5,20 +5,19 @@ Let’s call it x_0.
 Now, we define a process that gradually adds noise to this image over time.
 This is the **forward** diffusion process, and it takes the form of a Markov chain.
 
-Each new image, x_t, depends only on the one before it — x_{t-1}, — not on the full history.
+In the forward process, each new image, x_t, is conditionally independent of all earlier states given x_t-1. This conditional independence is known as the Markov property, meaning the process has no memory beyond the previous state.
 
-We’ll denote this process by q.
-
-At every step, we apply a gentle Gaussian perturbation:
+We’ll denote the forward process q.
+At every step, we apply a gentle Gaussian perturbation to the current sample, producing the next noisier sample in the chain.
 q_...
 
-The key is in the small b_t
+The key lies in the small b_t
 
 "Notice how the mean of xt is just a slightly scaled-down version of x_t−1
   — it stays close, but shrinks a little with each step."
 
 Now here’s the elegant part:
-"Because the forward process is a time-homogeneous Markov chain with Gaussian transitions,
+"Because the forward process is a Markov chain that adds independent Gaussian noise at each step,
 every x_t can be expressed as a linear combination of the original sample x_0 and t independent Gaussian noise terms.
 
 And since linear combinations of Gaussians are still Gaussian, that means:
@@ -55,31 +54,13 @@ We’ll denote it by p_theta
 
 p_theta = ...
 
-We’ll denote it by p_theta
+At each step in the reverse chain, we sample the next image from a Gaussian whose mean and variance are predicted by our model.
 
-At each step, we sample from this predicted Gaussian to obtain the next image in the chain.
-
-Now, notice — at each step of the reverse process, we don't just compute a mean and stop there.
-
-Instead, we sample a new image from a Gaussian distribution — one whose mean and variance are predicted by our model.
-
-Why?
-
-
+Why sample instead of just taking the mean?
 
 This sampling step is crucial. It introduces the stochasticity needed to capture the richness and diversity of the data distribution.
 
 If we always took the mean, we’d be generating the most likely reconstruction at every step — but real data isn’t just the average of possibilities.
 
-
-
-
-
-In other words, the model learns how to reverse the diffusion:
-how to denoise, how to recover structure — from x_T ∼N(0,I) all the way back to an image-like sample.
-
 By chaining these learned transitions together,
 we can gradually turn pure noise into something that resembles our original data.
-
-That’s the core idea behind diffusion models:
-learn to run the movie backward.

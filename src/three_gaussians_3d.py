@@ -100,15 +100,8 @@ class ThreeGaussians3D(ThreeDScene):
         y_label = axes.get_y_axis_label(Tex("y"))
         z_label = axes.get_z_axis_label(Tex("density"))
 
-        # Add title
-        title = Text("Unimodal → Multimodal Evolution", font_size=32, color=WHITE)
-        title.to_corner(UL)
-
         # Scene construction
         self.add(axes, x_label, y_label, z_label)
-        self.add_fixed_in_frame_mobjects(title)
-        
-        # Don't show the initial helper surface - it's just for transformation setup
         
         # Rotate camera to show different angles
         self.move_camera(phi=60 * DEGREES, theta=-45 * DEGREES, run_time=2)
@@ -127,12 +120,13 @@ class ThreeGaussians3D(ThreeDScene):
         first_visible_surface.set_style(fill_opacity=0.8, stroke_color=BLUE_D, stroke_width=0.5)
         first_visible_surface.set_fill_by_value(axes=axes, colorscale=[(BLUE_E, 0), (BLUE_D, 0.2), (BLUE_C, 0.5), (BLUE_B, 0.8), (BLUE_A, 1.2)], axis=2)
         
-        # Show the first visible surface and update title
-        stage_title = Text("Stage 1: Beginning to Split", font_size=28, color=YELLOW)
+        # Show the first visible surface and write title
+        stage_title = MathTex("p_{\\theta}(\\cdot|x_T)", font_size=32, color=YELLOW)
         stage_title.to_corner(UL)
+        
         self.play(Create(first_visible_surface), run_time=2)
         self.add_fixed_in_frame_mobjects(stage_title)
-        self.remove(title)
+        self.play(Write(stage_title), run_time=1)
         self.wait(1)
         
         # Sample a dot on the first surface
@@ -146,7 +140,7 @@ class ThreeGaussians3D(ThreeDScene):
             elif stage == 0:  # Fully separated
                 sample_x, sample_y = 1.2, 1.0  # Near top-right peak
             elif stage == -1:  # Chaotic
-                sample_x, sample_y = 1.8, 0.5  # One of the chaotic peaks
+                sample_x, sample_y = 2.25, 0.75  # One of the chaotic peaks
             else:
                 sample_x, sample_y = 0.0, 0.0
             
@@ -154,12 +148,34 @@ class ThreeGaussians3D(ThreeDScene):
             surface_point = multi_gaussian(sample_x, sample_y, stage)
             z_coord = surface_point[2]
             
-            return np.array([sample_x, sample_y, z_coord]) * 2  # Scale to match surface scaling
+            # Position the dot slightly above the surface to ensure visibility
+            offset_z = 0.1  # Small offset above surface
+            return np.array([sample_x, sample_y, z_coord + offset_z]) * 2  # Scale to match surface scaling
         
-        # Create initial sample dot
+        # Create initial sample dot with label above it
         initial_sample_pos = sample_point_on_surface(2)
         sample_dot = Dot3D(point=initial_sample_pos, radius=0.15, color=RED)
+        
+        # Create label positioned relative to screen, not 3D space
+        sample_label = MathTex("x_{T-1}", font_size=24, color=RED)
+        # Position it as a fixed frame element that follows the dot but stays screen-relative
+        self.add_fixed_in_frame_mobjects(sample_label)
+        
+        # Add updater to continuously position label above dot on screen
+        def update_label_position(label):
+            # Get the screen position of the dot
+            dot_screen_pos = self.camera.project_point(sample_dot.get_center())
+            # Position label slightly above the dot on screen
+            label_screen_pos = dot_screen_pos + np.array([0, 0.5, 0])
+            label.move_to(label_screen_pos)
+        
+        sample_label.add_updater(update_label_position)
+        
+        # Group dot and label together so they move as one unit
+        sample_group = VGroup(sample_dot, sample_label)
+        
         self.play(Create(sample_dot), run_time=1)
+        self.play(Write(sample_label), run_time=0.5)
         self.wait(1)
         
         # Update current_surface to be the first visible one
@@ -167,10 +183,17 @@ class ThreeGaussians3D(ThreeDScene):
         
         # Animate through remaining stages in reverse (2 → 1 → 0 → crazy)
         stage_titles = [
-            "Stage 1: Beginning to Split",
-            "Stage 2: Moving Apart",
-            "Stage 3: Fully Separated Modes",
-            "Stage 4: Chaotic Distribution!"
+            "p_{\\theta}(\\cdot|x_T)",
+            "p_{\\theta}(\\cdot|x_{T-1})",
+            "p_{\\theta}(\\cdot|x_{T-2})",
+            "\\text{Chaotic Distribution!}"
+        ]
+        
+        sample_labels = [
+            "x_{T-1}",
+            "x_{T-2}",
+            "x_{T-3}",
+            "x_{\\text{chaos}}"
         ]
         
         stage_colors = [YELLOW, YELLOW, YELLOW, RED]
@@ -191,56 +214,108 @@ class ThreeGaussians3D(ThreeDScene):
             next_surface.set_style(fill_opacity=0.8, stroke_color=BLUE_D, stroke_width=0.5)
             next_surface.set_fill_by_value(axes=axes, colorscale=[(BLUE_E, 0), (BLUE_D, 0.2), (BLUE_C, 0.5), (BLUE_B, 0.8), (BLUE_A, 1.2)], axis=2)
             
-            # Update title
-            stage_title = Text(stage_titles[i+1], font_size=28, color=stage_colors[i+1])
-            stage_title.to_corner(UL)
-            
-            if i == 0:
-                self.add_fixed_in_frame_mobjects(stage_title)
-                self.remove(title)
-            else:
-                prev_title = Text(stage_titles[i], font_size=28, color=stage_colors[i])
-                prev_title.to_corner(UL)
-                self.add_fixed_in_frame_mobjects(stage_title)
-                self.remove(prev_title)
-            
             surfaces.append(next_surface)
-
-
-        for i, surface in enumerate(surfaces[1:]):
-            # Transform surface
-            self.play(Transform(current_surface, surface), run_time=2)
+            
+            # Transform surface first
+            self.play(Transform(current_surface, next_surface), run_time=2)
+            
+            # Then update title with proper positioning
+            new_stage_title = MathTex(stage_titles[i+1], font_size=32, color=stage_colors[i+1])
+            new_stage_title.to_corner(UL)
+            
+            # Remove old title and add new one to ensure proper positioning
+            self.remove(stage_title)
+            self.add_fixed_in_frame_mobjects(new_stage_title)
+            
+            # Animate the title change with Write
+            self.play(
+                FadeOut(stage_title),
+                Write(new_stage_title),
+                run_time=1
+            )
+            
+            # Update reference for next iteration
+            stage_title = new_stage_title
             
             # Calculate new sample position for this stage
             current_stage = remaining_stages[i]
             
             if current_stage == -1:  # Chaotic stage - dot jumps off scene!
+                # Create new label for chaos positioned relative to screen
+                new_sample_label = MathTex(sample_labels[i+1], font_size=24, color=RED)
+                self.add_fixed_in_frame_mobjects(new_sample_label)
+                
+                # Remove old updater and add new one
+                sample_label.clear_updaters()
+                
+                # Add updater to new label to continuously follow dot
+                def update_chaos_label(label):
+                    dot_screen_pos = self.camera.project_point(sample_dot.get_center())
+                    label_screen_pos = dot_screen_pos + np.array([0, 0.5, 0])
+                    label.move_to(label_screen_pos)
+                
+                new_sample_label.add_updater(update_chaos_label)
+                
                 # First move to the chaotic peak briefly
                 chaotic_sample_pos = sample_point_on_surface(current_stage)
-                self.play(sample_dot.animate.move_to(chaotic_sample_pos), run_time=0.5)
+                
+                # Move dot and update label
+                self.play(
+                    sample_dot.animate.move_to(chaotic_sample_pos),
+                    Transform(sample_label, new_sample_label),
+                    run_time=0.5
+                )
+                
+                # Update reference
+                sample_label = new_sample_label
                 self.wait(0.5)
                 
-                # Then make it "jump up" dramatically
-                jump_position = chaotic_sample_pos + np.array([0, 0, 3.0])  # Jump up more moderately
+                # Then make them "jump up" dramatically together
+                jump_position = chaotic_sample_pos + np.array([0.5, 0, 0.75])
+                
                 self.play(
                     sample_dot.animate.move_to(jump_position),
-                    run_time=1,
+                    run_time=0.3,
                     rate_func=rush_from  # Fast acceleration upward
                 )
                 
-                # Then fall down out of the scene
-                fall_position = chaotic_sample_pos + np.array([0, 0, -15.0])  # Fall way down below
+                # Then fall down out of the scene together
+                fall_position = chaotic_sample_pos + np.array([0, 0, -15.0])
                 self.play(
                     sample_dot.animate.move_to(fall_position).set_opacity(0),
-                    run_time=2,
+                    sample_label.animate.set_opacity(0),
+                    run_time=0.8,
                     rate_func=rush_into  # Accelerating downward fall
                 )
                 # Add a dramatic pause after the "fall"
                 self.wait(2)
             else:
-                # Normal behavior for other stages
+                # Normal behavior for other stages - move dot with automatic label following
                 new_sample_pos = sample_point_on_surface(current_stage)
-                self.play(sample_dot.animate.move_to(new_sample_pos), run_time=1)
+                
+                # Create new label positioned relative to screen
+                new_sample_label = MathTex(sample_labels[i+1], font_size=24, color=RED)
+                self.add_fixed_in_frame_mobjects(new_sample_label)
+                
+                # Remove old updater and add new one to new label
+                sample_label.clear_updaters()
+                
+                def update_normal_label(label):
+                    dot_screen_pos = self.camera.project_point(sample_dot.get_center())
+                    label_screen_pos = dot_screen_pos + np.array([0, 0.5, 0])
+                    label.move_to(label_screen_pos)
+                
+                new_sample_label.add_updater(update_normal_label)
+                
+                # Move dot - label will automatically follow
+                self.play(
+                    sample_dot.animate.move_to(new_sample_pos),
+                    Transform(sample_label, new_sample_label),
+                    run_time=1
+                )
+                
+                # Update reference
+                sample_label = new_sample_label
                 self.wait(1)
         
         # Rotate camera again to show the final result

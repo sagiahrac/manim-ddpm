@@ -32,19 +32,86 @@ class DensityEvolutionSlide(Scene, DDPMBaseMixin):
         )
         self.wait(1)
 
-        # transform density_30 to density_20
-        
-
+        # Add sample point (dot) on the density
         xt = Dot(radius=0.035, color=RED)
         target_point = interpolate(density_30.get_top(), density_30.get_bottom(), 0.35)
         xt.move_to(target_point)
-        self.play(FadeIn(xt), run_time=0.5)
-
+        
+        # Create label for the sample point
+        xt_label = MathTex("x_T", font_size=18, color=RED)
+        xt_label.next_to(xt, RIGHT, buff=0.1)
+        
+        self.play(
+            FadeIn(xt),
+            Write(xt_label),
+            run_time=0.5
+        )
 
         # Add description for step 30
         noise_desc = MathTex("\\approx \\mathcal{N}(0, I)", font_size=18, color=GRAY)
         noise_desc.next_to(label_30, DOWN, buff=0.2)
         self.play(Write(noise_desc), run_time=0.8)
+        self.wait(1)
+        
+        # Move step 30 to final position and introduce step 20
+        density_20.move_to(RIGHT * 1.5)
+        label_20 = MathTex("p_{\\theta}(\\cdot|x_T)", font_size=24, color=WHITE)
+        label_20.next_to(density_20, DOWN, buff=0.3)
+        
+        # Move the sample point to new position
+        new_xt_point = interpolate(density_20.get_top(), density_20.get_bottom(), 0.4)
+        new_xt_label = MathTex("x_{T-1}", font_size=18, color=RED)
+        new_xt_label.next_to(new_xt_point, RIGHT, buff=0.1)
+        
+        self.play(
+            density_30.animate.move_to(RIGHT * 4.5),
+            xt_label.animate.move_to(xt_label.get_center()),  # Keep current label position
+            FadeIn(density_20),
+            Write(label_20),
+            xt.animate.move_to(new_xt_point),
+            Transform(xt_label, new_xt_label),
+            run_time=1.5
+        )
+        self.wait(0.8)
+        
+        # Move previous images and introduce step 10
+        density_10.move_to(LEFT * 1.5)
+        label_10 = MathTex("p_{\\theta}(\\cdot|x_{T-1})", font_size=24, color=WHITE)
+        label_10.next_to(density_10, DOWN, buff=0.3)
+        
+        # Move sample point again
+        new_xt_point_2 = interpolate(density_10.get_top(), density_10.get_bottom(), 0.6)
+        new_xt_label_2 = MathTex("x_{T-2}", font_size=18, color=RED)
+        new_xt_label_2.next_to(new_xt_point_2, RIGHT, buff=0.1)
+        
+        self.play(
+            density_20.animate.move_to(RIGHT * 1.5),
+            FadeIn(density_10),
+            Write(label_10),
+            xt.animate.move_to(new_xt_point_2),
+            Transform(xt_label, new_xt_label_2),
+            run_time=1.5
+        )
+        self.wait(0.8)
+        
+        # Finally introduce step 0 (original distribution)
+        density_0.move_to(LEFT * 4.5)
+        label_0 = MathTex("p_{\\theta}(x_0|x_1)", font_size=24, color=WHITE)
+        label_0.next_to(density_0, DOWN, buff=0.3)
+        
+        # Final sample point position
+        final_xt_point = interpolate(density_0.get_top(), density_0.get_bottom(), 0.7)
+        final_xt_label = MathTex("x_0", font_size=18, color=RED)
+        final_xt_label.next_to(final_xt_point, RIGHT, buff=0.1)
+        
+        self.play(
+            density_10.animate.move_to(LEFT * 1.5),
+            FadeIn(density_0),
+            Write(label_0),
+            xt.animate.move_to(final_xt_point),
+            Transform(xt_label, final_xt_label),
+            run_time=1.8
+        )
         self.wait(1)
         
         # Move step 30 to final position and introduce step 20

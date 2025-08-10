@@ -18,6 +18,7 @@ Usage examples:
 from manim import *
 from src import *
 from src.three_gaussians_3d import ThreeGaussians3D
+from src.chairs_zoom_slide import ChairsZoomSlide
 
 
 # Create proper scene classes for individual rendering
@@ -52,4 +53,7 @@ class DensityEvolutionSlideScene(DensityEvolutionSlide):
     pass
 
 class ThreeGaussians3DScene(ThreeGaussians3D):
+    pass
+
+class ChairsZoomSlideScene(ChairsZoomSlide):
     pass

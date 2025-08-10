@@ -25,6 +25,7 @@ class ForwardDiffusionSlide(Scene, DDPMBaseMixin):
     
     def construct(self):
         self.setup_3b1b_style()
+        self.add_sound("ForwardDiffusionSlideScene-enhanced-v2.wav")
         
         # Load images
         x0_init = self.image_from_path(PATHS["x0"], scale=0.5)
@@ -385,6 +386,8 @@ class ForwardDiffusionSlide(Scene, DDPMBaseMixin):
             FadeIn(backward_label),
             run_time=1.0
         )
+
+        self.wait(2)
         
         # Add red framed text for x_0 ~ p_θ(x_0) below x_0 image
         x0_backward_distribution = MathTex("x_0 \\sim p_{\\theta}(x_0)", font_size=20, color=WHITE)
@@ -436,19 +439,144 @@ class ForwardDiffusionSlide(Scene, DDPMBaseMixin):
             run_time=1.5
         )
         
-        self.wait(0.5)
+        # self.wait(0.5)
         
-        # Add curly brace and "Decoder" label under p_θ(x_{t-1} | x_t)
-        decoder_brace = Brace(backward_formula[0][0:11], DOWN, buff=0.05, stroke_width=0.1)
-        decoder_label = decoder_brace.get_text("Decoder")
-        decoder_label.scale(0.7)  # Make it even smaller
-        decoder_label.set_color(WHITE)
-        decoder_label.shift(UP * 0.15)  # Move text closer to the brace
+        # # Add curly brace and "Decoder" label under p_θ(x_{t-1} | x_t)
+        # decoder_brace = Brace(backward_formula[0][0:11], DOWN, buff=0.05, stroke_width=0.1)
+        # decoder_label = decoder_brace.get_text("Decoder")
+        # decoder_label.scale(0.7)  # Make it even smaller
+        # decoder_label.set_color(WHITE)
+        # decoder_label.shift(UP * 0.15)  # Move text closer to the brace
         
+        # self.play(
+        #     GrowFromCenter(decoder_brace),
+        #     Write(decoder_label),
+        #     run_time=1.0
+        # )
+        
+        self.wait(16)
+        
+        # Highlight μ_θ(x_t, t) - the mean term
         self.play(
-            GrowFromCenter(decoder_brace),
-            Write(decoder_label),
-            run_time=1.0
+            backward_formula[0][20:28].animate.set_color(BLUE),  # Highlight μ_θ(x_t, t)
+            run_time=0.5
         )
         
         
+        # Enlarge the mean term
+        self.play(
+            backward_formula[0][20:28].animate.scale(1.3),
+            run_time=0.5
+        )
+        
+        # self.wait(0.5)
+        
+        # Return mean term to normal size
+        self.play(
+            backward_formula[0][20:28].animate.scale(1/1.3),
+            run_time=0.5
+        )
+                
+        # Reset mean color and highlight Σ_θ(x_t, t) - the covariance term  
+        self.play(
+            backward_formula[0][20:28].animate.set_color(WHITE),  # Reset mean color
+            backward_formula[0][29:37].animate.set_color(GREEN),  # Highlight Σ_θ(x_t, t)
+            run_time=0.1
+        )
+        
+        
+        # Enlarge the covariance term
+        self.play(
+            backward_formula[0][29:37].animate.scale(1.3),
+            run_time=0.5
+        )
+        
+        
+        # Return covariance term to normal size
+        self.play(
+            backward_formula[0][29:37].animate.scale(1/1.3),
+            run_time=0.5
+        )
+        
+        self.wait(0.5)
+        
+        # Reset covariance color
+        self.play(
+            backward_formula[0][29:37].animate.set_color(WHITE),  # Reset covariance color
+            run_time=0.5
+        )
+        
+        # Fade out all elements except the backward formula
+        all_elements = Group(
+            x0_init, x0_label, xt, xt_label, xtt, xtt_label, xT, xT_label,
+            forward_label, right_arrow, x0_framed_text, transition_framed_text,
+            forward_step_arrow, left_dots, right_dots, left_arrow, backward_label,
+            x0_backward_framed, backward_transition_framed, convergence_framed
+        )
+        
+        self.play(
+            FadeOut(all_elements),
+            run_time=1
+        )
+        
+        # Move backward formula to center of the slide
+        self.play(
+            backward_formula.animate.move_to(ORIGIN).scale(1.2),
+            run_time=1
+        )
+
+
+        self.play(
+            backward_formula[0][20:28].animate.set_color(BLUE),  # Highlight μ_θ(x_t, t)
+            run_time=0.5
+        )
+        
+        self.wait(1)
+
+        # fade out all
+        self.play(
+            FadeOut(backward_formula),
+            run_time=1
+        )
+
+        chairs_image = ImageMobject("chairs-Photoroom.png")
+        
+        # Scale the image to full screen when zoomed out
+        chairs_image.scale_to_fit_height(config.frame_height)
+        
+        # Start with a zoomed-in view of the middle of the image
+        # Scale up significantly to focus on the center
+        chairs_image.scale(4.25)  # 4.25x zoom on the center
+        
+        # Start with 0 opacity for elegant appearance
+        chairs_image.set_opacity(0)
+        
+        # Add the zoomed image to the scene
+        self.add(chairs_image)
+        
+        # Elegant fade in
+        self.play(
+            chairs_image.animate.set_opacity(1),
+            run_time=2,
+            rate_func=smooth
+        )
+        
+        # Hold the zoomed view for a moment
+        self.wait(3)
+        
+        # Gradually zoom out to show the whole picture
+        self.play(
+            chairs_image.animate.scale(1/3.5),  # Zoom out to original size
+            run_time=10,
+            rate_func=smooth
+        )
+        
+        # Hold the full view
+        self.wait(2)
+        
+        # Elegant fade out at the end
+        self.play(
+            FadeOut(chairs_image),
+            run_time=1,
+            rate_func=smooth
+        )
