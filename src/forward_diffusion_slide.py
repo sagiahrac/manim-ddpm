@@ -38,7 +38,7 @@ class ForwardDiffusionSlide(Scene, DDPMBaseMixin):
         self.play(x0_init.animate.set_opacity(1), run_time=1)
         
         # Hold for 1 second
-        self.wait(1)
+        self.wait(4)
         
         # Then: Move to left and scale down
         x0_target = LEFT * 4.5 + UP
@@ -136,7 +136,7 @@ class ForwardDiffusionSlide(Scene, DDPMBaseMixin):
             run_time=1.5
         )
         
-        self.wait(1)
+        self.wait(10)
         
         # Create another framed text for q(x_t}|x_{t-1}) in the middle of the arrow
         transition_distribution = MathTex("q(x_t|x_{t-1})", font_size=20, color=WHITE)
@@ -186,7 +186,7 @@ class ForwardDiffusionSlide(Scene, DDPMBaseMixin):
             run_time=1.0
         )
         
-        self.wait(1)
+        self.wait(16)
         
         # Add the step-wise transition formula
         step_formula = MathTex(
@@ -213,7 +213,7 @@ class ForwardDiffusionSlide(Scene, DDPMBaseMixin):
             run_time=1.5
         )
         
-        self.wait(0.5)
+        self.wait(6)
         
         self.play(
             FadeIn(betas),
@@ -263,7 +263,7 @@ class ForwardDiffusionSlide(Scene, DDPMBaseMixin):
             run_time=1.5
         )
         
-        self.wait(0.5)
+        self.wait(32)
         
         # Add the direct transition formula
         direct_formula = MathTex(
@@ -279,7 +279,7 @@ class ForwardDiffusionSlide(Scene, DDPMBaseMixin):
             run_time=1.5
         )
         
-        self.wait(1)
+        self.wait(3)
         
         # Add definition of alpha bar (first part only)
         alpha_definition_part1 = MathTex(
@@ -302,14 +302,14 @@ class ForwardDiffusionSlide(Scene, DDPMBaseMixin):
             run_time=1.5
         )
         
-        self.wait(1)
+        self.wait(10)
         
         self.play(
             FadeIn(alpha_definition_part2),
             run_time=1.5
         )
         
-        self.wait(1)
+        self.wait(7)
         
         # Add convergence to normal distribution
         convergence_arrow = MathTex(
@@ -358,6 +358,8 @@ class ForwardDiffusionSlide(Scene, DDPMBaseMixin):
             FadeOut(alpha_definition_part2),
             run_time=1
         )
+
+        self.wait(14)
         
 
         left_arrow_end = x0.get_center() + DOWN * 1.75 + LEFT * 1.2
