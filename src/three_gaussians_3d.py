@@ -186,7 +186,7 @@ class ThreeGaussians3D(ThreeDScene):
             "p_{\\theta}(\\cdot|x_T)",
             "p_{\\theta}(\\cdot|x_{T-1})",
             "p_{\\theta}(\\cdot|x_{T-2})",
-            "\\text{Chaotic Distribution!}"
+            "\\text{Poorly Learned Distribution!}"
         ]
         
         sample_labels = [
