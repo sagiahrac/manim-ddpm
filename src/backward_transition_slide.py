@@ -135,6 +135,29 @@ class BackwardTransitionSlide(Scene, DDPMBaseMixin):
         
         return VGroup(trapezoid, decoder_text)
     
+    def create_encoder_shape(self):
+        """Create a visual encoder representation using shapes (mirrored decoder)."""        
+        # Define trapezoid vertices - mirrored decoder shape (wider at bottom)
+        top_left = ORIGIN + 0.5 * LEFT + 1.75 * UP
+        top_right = ORIGIN + 0.5 * RIGHT + 1.5 * UP
+        bottom_right = ORIGIN + 0.5 * RIGHT + 0.5 * UP
+        bottom_left = ORIGIN + 0.5 * LEFT + 0.25 * UP
+        
+        # Create the trapezoid
+        trapezoid = Polygon(
+            top_left, top_right, bottom_right, bottom_left,
+            color=GREEN_A, 
+            stroke_width=3, 
+            fill_opacity=0.2,
+            fill_color=GREEN_A
+        )
+        
+        # Add encoder text in the center
+        encoder_text = Text("Encoder", font_size=18, color=WHITE)
+        encoder_text.next_to(trapezoid, DOWN, buff=0.3)
+        
+        return VGroup(trapezoid, encoder_text)
+    
     def construct(self):
         self.setup_3b1b_style()
 
