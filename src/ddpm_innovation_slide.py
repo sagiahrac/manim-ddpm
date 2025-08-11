@@ -8,6 +8,8 @@ class DDPMInnovationSlide(Scene, DDPMBaseMixin):
     def construct(self):
         self.setup_3b1b_style()
 
+        self.wait(7)
+
         # Start with noisy corgi in the center
         corgi = ImageMobject("media/images/corgi.png")
         corgi.scale(0.15)
@@ -43,6 +45,8 @@ class DDPMInnovationSlide(Scene, DDPMBaseMixin):
 
         # Show the noisy image
         self.play(noisy_corgy_anim)
+
+        self.wait(2)
         
         # Separate the extra noise group and move it aside
         corgi_denoised = Group(corgi.copy(), noise_group.copy())
@@ -67,6 +71,8 @@ class DDPMInnovationSlide(Scene, DDPMBaseMixin):
         )
         
         self.play(corgi_denoised_anim)
+
+        self.wait(7)
         
         noisy_corgy_anim = AnimationGroup(
             FadeIn(corgi_noisy),
@@ -97,10 +103,13 @@ class DDPMInnovationSlide(Scene, DDPMBaseMixin):
         
         
         self.play(Write(noise_label), Write(minus_sign))
+
+        self.wait(34)
         
         self.play(
             *[FadeOut(mob)for mob in self.mobjects]
         )
+
         # All Fade Out
         
 
