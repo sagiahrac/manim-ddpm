@@ -112,6 +112,29 @@ class BackwardTransitionSlide(Scene, DDPMBaseMixin):
         
         return VGroup(vector_group, brackets)
     
+    def create_decoder_shape(self):
+        """Create a visual decoder representation using shapes."""        
+        # Define trapezoid vertices - proper decoder shape
+        top_left = ORIGIN + 0.5 * LEFT + 1.5 * UP
+        top_right = ORIGIN + 0.5 * RIGHT + 1.75 * UP
+        bottom_right = ORIGIN + 0.5 * RIGHT + 0.25 * UP
+        bottom_left = ORIGIN + 0.5 * LEFT + 0.5 * UP
+        
+        # Create the trapezoid
+        trapezoid = Polygon(
+            top_left, top_right, bottom_right, bottom_left,
+            color=PURPLE, 
+            stroke_width=3, 
+            fill_opacity=0.2,
+            fill_color=PURPLE
+        )
+        
+        # Add decoder text in the center
+        decoder_text = Text("Decoder", font_size=18, color=WHITE)
+        decoder_text.next_to(trapezoid, DOWN, buff=0.3)
+        
+        return VGroup(trapezoid, decoder_text)
+    
     def construct(self):
         self.setup_3b1b_style()
 
@@ -246,50 +269,34 @@ class BackwardTransitionSlide(Scene, DDPMBaseMixin):
             ),
             run_time=1.5
         )
-        
-        # Move x0_vector to the right side to make room for decoder
+
         self.play(
-            x0_vector.animate.move_to(RIGHT * 2 + UP),
-            x0_label.animate.move_to(RIGHT * 2 + UP * 0.2),
+            x0_vector.animate.shift(7.5 * RIGHT),
+            x0_label.animate.shift(7.5 * RIGHT),
             run_time=1.0
         )
-        
-        # Add decoder label and arrow
-        decoder_label = Text("Decoder", font_size=24, color=YELLOW)
-        decoder_label.move_to(ORIGIN)
-        
-        decoder_arrow = Arrow(
-            start=RIGHT * 1 + UP,
-            end=LEFT * 1 + UP,
-            color=YELLOW,
-            stroke_width=4
-        )
-        
-        self.play(
-            Write(decoder_label),
-            Create(decoder_arrow),
-            run_time=1.0
-        )
-        
-        # Create the decoded image on the left side
-        x0_decoded = self.image_from_path(PATHS["x0"], scale=0.2)
-        x0_decoded = self.framed_image(x0_decoded, color=GREEN, buff=0.05)  # Green frame to distinguish as output
-        x0_decoded.move_to(LEFT * 2.5 + UP)
-        x0_decoded_grid = self.add_grid_to_image(x0_decoded[0], grid_color=GREEN)
-        
-        # Create a new label for the decoded image
-        x0_decoded_label = MathTex("\\text{Image}", font_size=20, color=GREEN)
-        x0_decoded_label.next_to(x0_decoded, DOWN, buff=0.2)
-        
-        # Transform: show the decoder output appearing
-        self.play(
-            FadeIn(x0_decoded),
-            FadeIn(x0_decoded_grid),
-            Write(x0_decoded_label),
-            run_time=1.5
-        )
-        
 
         
-        # Final wait to show the transformed scene
-        self.wait(3)
+        # # Create and add the visual decoder shape at the same height as other objects
+        decoder_shape = self.create_decoder_shape()
+        self.play(
+            Create(decoder_shape),
+            run_time=1.5
+        )
+
+        # Create a copy of x0_vector to fade transform into an image
+        x0_vector_copy = x0_vector.copy()
+        
+        # Create the final decoded image at the left of the decoder
+        x0_decoded = self.image_from_path(PATHS["x0"], scale=0.2)
+        x0_decoded = self.framed_image(x0_decoded, color=GREEN, buff=0.05)
+        x0_decoded.move_to(LEFT * 3 + UP * 1)  # Position to the left of decoder
+        
+        # Fade transform the vector copy to the decoded image
+        self.play(
+            FadeTransform(x0_vector_copy, x0_decoded, stretch=True),
+            run_time=2.0
+        )
+        
+        self.wait(2)
+

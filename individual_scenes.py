@@ -57,3 +57,6 @@ class ThreeGaussians3DScene(ThreeGaussians3D):
 
 class ChairsZoomSlideScene(ChairsZoomSlide):
     pass
+
+class BackwardTransitionSlideScene(BackwardTransitionSlide):
+    pass
