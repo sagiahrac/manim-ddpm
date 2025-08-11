@@ -487,9 +487,31 @@ class BackwardTransitionSlide(Scene, DDPMBaseMixin):
 
         self.wait(1)
 
+
+        decoder_center = decoder_shape.get_center() + 0.25 * UP
+        x0_image_target = UP + 3 * LEFT  # Place the vector at the right of the encoder
+        x0.move_to(x0_image_target)
+        x0_grid.move_to(x0_image_target)
+
         self.play(
-            FadeTransform(x0_vector, self.image_from_path(PATHS["x0"], scale=0.2).move_to(LEFT * 3 + UP * 1), stretch=True),
+            LaggedStart(
+                FadeOut(x0_vector, target_position=decoder_center, scale=0.6),
+                FadeIn(Group(x0, x0_grid), scale=0.5, target_position=decoder_center),
+                lag_ratio=0.2   # tune overlap
+            ),
             run_time=2.0
         )
+
         
         self.wait(1)
+
+        self.play(
+            FadeOut(decoder_shape),
+        )
+
+        self.play(
+            x0.animate.shift(3 * RIGHT),
+            x0_grid.animate.shift(3 * RIGHT),
+            run_time=2.0
+        )
+
