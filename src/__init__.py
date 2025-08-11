@@ -8,3 +8,4 @@ from .ddpm_innovation_slide import DDPMInnovationSlide
 from .density_evolution_slide import DensityEvolutionSlide
 from .three_gaussians_3d import ThreeGaussians3D
 from .backward_transition_slide import BackwardTransitionSlide
+from .final_scene import NeuralNetworkFade

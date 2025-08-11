@@ -8,4 +8,6 @@ In standard diffusion, noise is added in a fixed way: the schedule, the distribu
 Instead, the model could learn these parameters directly, or even generate them on the fly as part of the process, adapting the corruption to the structure of each sample.
 This could mean per-image noise schedules, spatially varying variances, or non-Gaussian perturbations that make the reverse process easier and more data-efficient.
 
+We could also explore adaptive compression, where the model learns to preserve the regions that carry the most semantic weight while compressing less important areas more aggressively.
+
 Pixel-space DDPMs established the concept, latent diffusion made it practical, and the next steps aim to make it more adaptive, efficient, and capable.
