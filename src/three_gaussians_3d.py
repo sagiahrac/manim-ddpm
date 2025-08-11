@@ -138,7 +138,7 @@ class ThreeGaussians3D(ThreeDScene):
             elif stage == 1:  # Moving apart
                 sample_x, sample_y = -1.2, -0.2  # Near left peak
             elif stage == 0:  # Fully separated
-                sample_x, sample_y = 1.2, 1.0  # Near top-right peak
+                sample_x, sample_y = 1.6, -1.5  # Near top-right peak
             elif stage == -1:  # Chaotic
                 sample_x, sample_y = 2.25, 0.75  # One of the chaotic peaks
             else:
@@ -157,7 +157,7 @@ class ThreeGaussians3D(ThreeDScene):
         sample_dot = Dot3D(point=initial_sample_pos, radius=0.15, color=RED)
         
         # Create label positioned relative to screen, not 3D space
-        sample_label = MathTex("x_T", font_size=36, color=RED, stroke_width=3, stroke_color=WHITE, fill_opacity=1.0, stroke_opacity=1.0)
+        sample_label = MathTex("x_T", font_size=36, color=YELLOW, fill_opacity=1.0)
         # Position it as a fixed frame element that follows the dot but stays screen-relative
         self.add_fixed_in_frame_mobjects(sample_label)
         
@@ -266,7 +266,7 @@ class ThreeGaussians3D(ThreeDScene):
             new_sample_pos = sample_point_on_surface(current_stage)
             
             # Prepare new label
-            new_sample_label = MathTex(sample_labels[i], font_size=36, color=RED, stroke_width=3, stroke_color=WHITE, fill_opacity=1.0, stroke_opacity=1.0)
+            new_sample_label = MathTex(sample_labels[i], font_size=36, color=YELLOW, fill_opacity=1.0)
             self.add_fixed_in_frame_mobjects(new_sample_label)
             
             # Remove old updater first to stop label tracking
