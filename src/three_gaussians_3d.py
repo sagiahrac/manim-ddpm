@@ -157,7 +157,7 @@ class ThreeGaussians3D(ThreeDScene):
         sample_dot = Dot3D(point=initial_sample_pos, radius=0.15, color=RED)
         
         # Create label positioned relative to screen, not 3D space
-        sample_label = MathTex("x_{T-1}", font_size=24, color=RED)
+        sample_label = MathTex("x_T", font_size=36, color=RED, stroke_width=3, stroke_color=WHITE, fill_opacity=1.0, stroke_opacity=1.0)
         # Position it as a fixed frame element that follows the dot but stays screen-relative
         self.add_fixed_in_frame_mobjects(sample_label)
         
@@ -261,8 +261,37 @@ class ThreeGaussians3D(ThreeDScene):
             
             surfaces.append(next_surface)
             
-            # Transform surface first
-            self.play(Transform(current_surface, next_surface), run_time=2)
+            # Calculate new sample position for this stage BEFORE the transformation
+            current_stage = remaining_stages[i]
+            new_sample_pos = sample_point_on_surface(current_stage)
+            
+            # Prepare new label
+            new_sample_label = MathTex(sample_labels[i], font_size=36, color=RED, stroke_width=3, stroke_color=WHITE, fill_opacity=1.0, stroke_opacity=1.0)
+            self.add_fixed_in_frame_mobjects(new_sample_label)
+            
+            # Remove old updater first to stop label tracking
+            sample_label.clear_updaters()
+            
+            # Add updater to new label
+            def update_new_label(label):
+                dot_screen_pos = self.camera.project_point(sample_dot.get_center())
+                label_screen_pos = dot_screen_pos + np.array([0, 0.5, 0])
+                label.move_to(label_screen_pos)
+            
+            new_sample_label.add_updater(update_new_label)
+            
+            # Transform surface AND move dot AND change label simultaneously
+            self.play(
+                Transform(current_surface, next_surface),
+                sample_dot.animate.move_to(new_sample_pos),
+                FadeOut(sample_label),
+                FadeIn(new_sample_label),
+                run_time=2
+            )
+            
+            # Remove old label and update reference
+            self.remove(sample_label)
+            sample_label = new_sample_label
             
             # Then update title with proper positioning
             new_stage_title = MathTex(stage_titles[i+1], font_size=32, color=stage_colors[i+1])
@@ -282,41 +311,12 @@ class ThreeGaussians3D(ThreeDScene):
             # Update reference for next iteration
             stage_title = new_stage_title
             
-            # Calculate new sample position for this stage
-            current_stage = remaining_stages[i]
-            
+            # Special handling for chaotic stage jumping
             if current_stage == -1:  # Chaotic stage - dot jumps off scene!
-                # Create new label for chaos positioned relative to screen
-                new_sample_label = MathTex(sample_labels[i+1], font_size=24, color=RED)
-                self.add_fixed_in_frame_mobjects(new_sample_label)
-                
-                # Remove old updater and add new one
-                sample_label.clear_updaters()
-                
-                # Add updater to new label to continuously follow dot
-                def update_chaos_label(label):
-                    dot_screen_pos = self.camera.project_point(sample_dot.get_center())
-                    label_screen_pos = dot_screen_pos + np.array([0, 0.5, 0])
-                    label.move_to(label_screen_pos)
-                
-                new_sample_label.add_updater(update_chaos_label)
-                
-                # First move to the chaotic peak briefly
-                chaotic_sample_pos = sample_point_on_surface(current_stage)
-                
-                # Move dot and update label
-                self.play(
-                    sample_dot.animate.move_to(chaotic_sample_pos),
-                    Transform(sample_label, new_sample_label),
-                    run_time=0.5
-                )
-                
-                # Update reference
-                sample_label = new_sample_label
                 self.wait(0.5)
                 
                 # Then make them "jump up" dramatically together
-                jump_position = chaotic_sample_pos + np.array([0.5, 0, 0.75])
+                jump_position = new_sample_pos + np.array([0.5, 0, 0.75])
                 
                 self.play(
                     sample_dot.animate.move_to(jump_position),
@@ -324,8 +324,11 @@ class ThreeGaussians3D(ThreeDScene):
                     rate_func=rush_from  # Fast acceleration upward
                 )
                 
+                # Clear updater before falling to prevent label tracking during fall
+                sample_label.clear_updaters()
+                
                 # Then fall down out of the scene together
-                fall_position = chaotic_sample_pos + np.array([0, 0, -15.0])
+                fall_position = new_sample_pos + np.array([0, 0, -15.0])
                 self.play(
                     sample_dot.animate.move_to(fall_position).set_opacity(0),
                     sample_label.animate.set_opacity(0),
@@ -335,32 +338,7 @@ class ThreeGaussians3D(ThreeDScene):
                 # Add a dramatic pause after the "fall"
                 self.wait(2)
             else:
-                # Normal behavior for other stages - move dot with automatic label following
-                new_sample_pos = sample_point_on_surface(current_stage)
-                
-                # Create new label positioned relative to screen
-                new_sample_label = MathTex(sample_labels[i+1], font_size=24, color=RED)
-                self.add_fixed_in_frame_mobjects(new_sample_label)
-                
-                # Remove old updater and add new one to new label
-                sample_label.clear_updaters()
-                
-                def update_normal_label(label):
-                    dot_screen_pos = self.camera.project_point(sample_dot.get_center())
-                    label_screen_pos = dot_screen_pos + np.array([0, 0.5, 0])
-                    label.move_to(label_screen_pos)
-                
-                new_sample_label.add_updater(update_normal_label)
-                
-                # Move dot - label will automatically follow
-                self.play(
-                    sample_dot.animate.move_to(new_sample_pos),
-                    Transform(sample_label, new_sample_label),
-                    run_time=1
-                )
-                
-                # Update reference
-                sample_label = new_sample_label
+                # For normal stages, just wait a bit since movement already happened
                 self.wait(1)
         
         # Rotate camera again to show the final result
