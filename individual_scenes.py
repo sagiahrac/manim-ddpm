@@ -14,6 +14,7 @@ Usage examples:
 - manim individual_scenes.py CelebAHQDemoSlideScene -ql
 - manim individual_scenes.py DDPMInnovationSlideScene -ql
 - manim individual_scenes.py ThreeIdeasIntersectionSlideScene -ql
+- manim individual_scenes.py FinalSceneScene -ql
 """
 
 from manim import *
@@ -21,11 +22,7 @@ from src import *
 from src.three_gaussians_3d import ThreeGaussians3D
 from src.chairs_zoom_slide import ChairsZoomSlide
 from src.three_ideas_intersection_slide import ThreeIdeasIntersectionSlide
-from src.final_scene import NeuralNetworkFade
-
-class NeuralNetworkFadeScene(NeuralNetworkFade):
-    """Scene wrapper for individual_scenes.py"""
-    pass
+from src.final_scene import FinalScene
 
 
 # Create proper scene classes for individual rendering
@@ -69,4 +66,7 @@ class BackwardTransitionSlideScene(BackwardTransitionSlide):
     pass
 
 class ThreeIdeasIntersectionSlideScene(ThreeIdeasIntersectionSlide):
+    pass
+
+class FinalSceneScene(FinalScene):
     pass

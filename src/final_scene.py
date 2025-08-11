@@ -2,9 +2,7 @@ from manim import *
 from .base import DDPMBaseMixin
 
 
-
-
-class NeuralNetworkFade(Scene, DDPMBaseMixin):
+class FinalScene(Scene, DDPMBaseMixin):
     def image_from_path(self, path, scale=0.2):
         """Load an image from a given path and scale it."""
         img = ImageMobject(path)
@@ -184,36 +182,89 @@ class NeuralNetworkFade(Scene, DDPMBaseMixin):
     def construct(self):
         self.setup_3b1b_style()
 
+        # Bullet 1: Joint End-to-End Training with full_framework
+        bullet1 = Text("1. Joint End-to-End Training", font_size=24, color=YELLOW, weight=BOLD)
+        bullet1.move_to(UP * 2 + LEFT * 3)
+        
+        # Create the encoder-decoder-neural network framework
         encoder = self.create_encoder_shape()
         decoder = self.create_decoder_shape()
         neural_network = self.craete_nn()
 
-        # Position the encoder and decoder
-        encoder.move_to(LEFT * 0.75 + UP * 1.5)
-        decoder.move_to(RIGHT * 0.75 + UP * 1.5)
-        neural_network.move_to(UP * 1.5)
+        # Position the components
+        encoder.move_to(LEFT * 0.75 + UP * 1.2)
+        decoder.move_to(RIGHT * 0.75 + UP * 1.2)
+        neural_network.move_to(UP * 1.2)
 
         encoder.scale(0.3)
         decoder.scale(0.3)
         neural_network.scale(0.25)
 
         full_framework = VGroup(encoder, decoder, neural_network)
-        
+        full_framework.move_to(UP * 2 + RIGHT * 2)
 
         self.play(
+            Write(bullet1),
             FadeIn(full_framework),
+            run_time=2
         )
+        self.wait(1)
 
+        # Bullet 2: Learnable Forward Process with q_phi
+        bullet2 = Text("2. Learnable Forward Process", font_size=24, color=YELLOW, weight=BOLD)
+        bullet2.move_to(ORIGIN + LEFT * 3)
 
         q_phi = MathTex(r"q_\phi(x_t | x_{t-1})", color=WHITE, font_size=32)
+        q_phi.move_to(ORIGIN + RIGHT * 2)
+
         self.play(
+            Write(bullet2),
             Write(q_phi),
+            run_time=2
         )
+        self.wait(1)
+
+        # Bullet 3: Adaptive Compression with beatles image
+        bullet3 = Text("3. Adaptive Compression", font_size=24, color=YELLOW, weight=BOLD)
+        bullet3.move_to(DOWN * 2 + LEFT * 3)
 
         beatles = self.image_from_path("beatles_neg.png", scale=0.4)
         beatles_framed = self.framed_image(beatles, color=YELLOW, buff=0.05)
-        beatles_framed.move_to(ORIGIN + 1.5 * DOWN)
+        beatles_framed.move_to(DOWN * 1.8 + RIGHT * 2)
 
         self.play(
+            Write(bullet3),
             FadeIn(beatles_framed),
+            run_time=2
+        )
+        self.wait(2)
+
+
+        # Fade out everything
+        self.play(
+            FadeOut(bullet1),
+            FadeOut(bullet2), 
+            FadeOut(bullet3),
+            FadeOut(full_framework),
+            FadeOut(q_phi),
+            FadeOut(beatles_framed),
+        )
+        self.wait(1)
+
+        # Final message
+        line1 = Text("Pixel-space DDPMs established the concept,", font_size=28, color=BLUE)
+        line2 = Text("latent diffusion made it practical,", font_size=28, color=BLUE)
+        line3 = Text("and the next steps aim to make it more adaptive, efficient, and capable.", font_size=28, color=BLUE)
+        lines = VGroup(line1, line2, line3).arrange(DOWN, aligned_edge=ORIGIN, buff=0.2)
+
+        self.play(FadeIn(line1))
+        self.wait(3)
+        self.play(FadeIn(line2))
+        self.wait(2)
+        self.play(FadeIn(line3))
+        self.wait(3)
+        conclusion = lines
+
+        self.play(
+            FadeOut(conclusion),
         )
