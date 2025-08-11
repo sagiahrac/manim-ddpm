@@ -212,7 +212,52 @@ class ThreeGaussians3D(ThreeDScene):
             # Style the new surface
             next_surface.scale(2, about_point=ORIGIN)
             next_surface.set_style(fill_opacity=0.8, stroke_color=BLUE_D, stroke_width=0.5)
-            next_surface.set_fill_by_value(axes=axes, colorscale=[(BLUE_E, 0), (BLUE_D, 0.2), (BLUE_C, 0.5), (BLUE_B, 0.8), (BLUE_A, 1.2)], axis=2)
+            
+            # Use different colorscale for chaotic distribution (stage -1)
+            if stage == -1:
+                # For chaotic distribution, we need to color based on density values
+                peak_height = 0.1  # Maximum possible height in chaotic distribution  
+                threshold = peak_height / 2  # Half of peak = 0.75
+                
+                # First apply default styling
+                next_surface.set_style(fill_opacity=0.8, stroke_color=BLUE_D, stroke_width=0.5)
+                
+                # Custom coloring based on density values
+                def get_density_color(u, v):
+                    density_point = multi_gaussian(u, v, stage=-1)
+                    density_value = density_point[2]
+                    
+                    if density_value < threshold:
+                        # Red gradient for low density
+                        ratio = density_value / threshold
+                        if ratio < 0.33:
+                            return interpolate_color(RED_E, RED_D, ratio * 3)
+                        elif ratio < 0.67:
+                            return interpolate_color(RED_D, RED_C, (ratio - 0.33) * 3)
+                        else:
+                            return interpolate_color(RED_C, RED_B, (ratio - 0.67) * 3)
+                    else:
+                        # Blue gradient for high density
+                        excess_ratio = (density_value - threshold) / (peak_height - threshold)
+                        if excess_ratio < 0.33:
+                            return interpolate_color(BLUE_C, BLUE_B, excess_ratio * 3)
+                        else:
+                            return interpolate_color(BLUE_B, BLUE_A, min(1.0, (excess_ratio - 0.33) * 1.5))
+                
+                # Apply coloring to each submobject based on its center point
+                for submob in next_surface.submobjects:
+                    # Get the center of the submobject in parameter space
+                    center_3d = submob.get_center()
+                    # Convert back to parameter space (reverse the scaling)
+                    u_center = center_3d[0] / 2  # Reverse the scale(2) operation
+                    v_center = center_3d[1] / 2
+                    
+                    # Get the appropriate color for this density value
+                    color = get_density_color(u_center, v_center)
+                    submob.set_fill(color, opacity=0.8)
+            else:
+                # Normal blue colorscale for other stages
+                next_surface.set_fill_by_value(axes=axes, colorscale=[(BLUE_E, 0), (BLUE_D, 0.2), (BLUE_C, 0.5), (BLUE_B, 0.8), (BLUE_A, 1.2)], axis=2)
             
             surfaces.append(next_surface)
             
