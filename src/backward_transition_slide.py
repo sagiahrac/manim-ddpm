@@ -133,7 +133,7 @@ class BackwardTransitionSlide(Scene, DDPMBaseMixin):
         decoder_text = Text("Decoder", font_size=18, color=WHITE)
         decoder_text.next_to(trapezoid, DOWN, buff=0.3)
         
-        return VGroup(trapezoid, decoder_text)
+        return Group(trapezoid, decoder_text)
     
     def create_encoder_shape(self):
         """Create a visual encoder representation using shapes (mirrored decoder)."""        
@@ -156,7 +156,7 @@ class BackwardTransitionSlide(Scene, DDPMBaseMixin):
         encoder_text = Text("Encoder", font_size=18, color=WHITE)
         encoder_text.next_to(trapezoid, DOWN, buff=0.3)
         
-        return VGroup(trapezoid, encoder_text)
+        return Group(trapezoid, encoder_text)
     
     def construct(self):
         self.setup_3b1b_style()
@@ -256,70 +256,173 @@ class BackwardTransitionSlide(Scene, DDPMBaseMixin):
         xtt_vector = self.create_dot_vector(xtt.get_center(), blue_dots=1, brown_dots=3)
         xT_vector = self.create_dot_vector(xT.get_center(), blue_dots=3, brown_dots=1)
         
-        # Transform all images to vectors
+
         self.play(
             AnimationGroup(
                 # Fade out all images and their grids, fade in vectors
-                FadeOut(x0),
-                FadeOut(x0_grid),
-                FadeIn(x0_vector),
+                FadeOut(x0_label),
                 FadeOut(xt),
                 FadeOut(xt_grid),
-                FadeIn(xt_vector),
+                FadeOut(xt_label),
                 FadeOut(xtt),
                 FadeOut(xtt_grid),
-                FadeIn(xtt_vector),
+                FadeOut(xtt_label),
                 FadeOut(xT),
                 FadeOut(xT_grid),
+                FadeOut(xT_label),
+                lag_ratio=0.1
+            ),
+            run_time=2.0
+        )
+
+        encoder_shape = self.create_encoder_shape()
+        self.play(
+            AnimationGroup(
+                x0.animate.shift(1.5 * RIGHT),
+                x0_grid.animate.shift(1.5 * RIGHT),
+            ),
+            FadeIn(encoder_shape),
+            lag_ratio=1
+        )
+
+        self.wait(1)
+
+        # group x0 and animation grid and move them to the center
+        encoder_center = encoder_shape.get_center() + 0.25 * UP
+        x0_vector_target = UP + 3 * RIGHT  # Place the vector at the right of the encoder
+        x0_vector.move_to(x0_vector_target)
+
+        self.play(
+            LaggedStart(
+                FadeOut(Group(x0, x0_grid), scale=0.5, target_position=encoder_center),
+                FadeIn(x0_vector, target_position=encoder_center, scale=0.6),
+                lag_ratio=0.2   # tune overlap
+            ),
+            run_time=2.0
+        )
+
+
+        self.play(
+            LaggedStart(
+                FadeOut(encoder_shape),
+                x0_vector.animate.shift(7.5 * LEFT),
+                lag_ratio=0.2   # tune overlap
+            ),
+        )
+
+        self.play(
+            Write(x0_label)
+        )
+
+
+        # Fade trasform
+
+
+
+        # self.play(
+        #     AnimationGroup(
+        #         FadeOut(x0, scale=0.5, target_position=encoder_shape.get_center() + 0.25*UP),
+        #         FadeOut(x0_grid, scale=0.5, target_position=encoder_shape.get_center() + 0.25*UP),
+        #     ),
+        #     FadeIn(x0_vector, target_position=encoder_shape.get_center() + 0.25*UP, scale=0.6),
+        # )
+
+
+
+
+
+        
+        # Transform all images to vectors
+        self.play(
+            AnimationGroup(
+                FadeIn(xt_vector),
+                Write(xt_label),
+                FadeIn(xtt_vector),
+                Write(xtt_label),
                 FadeIn(xT_vector),
+                Write(xT_label),
                 lag_ratio=0.2
             ),
             run_time=2.0
         )
-        
+
         self.wait(1)
-        
-        # Fade out all vectors except x0_vector and focus on the decoding process
+
+
         self.play(
             AnimationGroup(
+                FadeOut(x0_label),
                 FadeOut(xt_vector),
-                FadeOut(xtt_vector), 
-                FadeOut(xT_vector),
                 FadeOut(xt_label),
+                FadeOut(xtt_vector),
                 FadeOut(xtt_label),
+                FadeOut(xT_vector),
                 FadeOut(xT_label),
-                lag_ratio=0.1
             ),
-            run_time=1.5
+            run_time=2.0
         )
 
-        self.play(
-            x0_vector.animate.shift(7.5 * RIGHT),
-            x0_label.animate.shift(7.5 * RIGHT),
-            run_time=1.0
-        )
+        self.wait(1)
 
-        
-        # # Create and add the visual decoder shape at the same height as other objects
         decoder_shape = self.create_decoder_shape()
         self.play(
-            Create(decoder_shape),
-            run_time=1.5
+            AnimationGroup(
+                x0_vector.animate.shift(7.5 * RIGHT),
+            ),
         )
 
-        # Create a copy of x0_vector to fade transform into an image
-        x0_vector_copy = x0_vector.copy()
-        
-        # Create the final decoded image at the left of the decoder
-        x0_decoded = self.image_from_path(PATHS["x0"], scale=0.2)
-        x0_decoded = self.framed_image(x0_decoded, color=GREEN, buff=0.05)
-        x0_decoded.move_to(LEFT * 3 + UP * 1)  # Position to the left of decoder
-        
-        # Fade transform the vector copy to the decoded image
+        self.play(FadeIn(decoder_shape))
+
+        self.wait(1)
+
         self.play(
-            FadeTransform(x0_vector_copy, x0_decoded, stretch=True),
+            FadeTransform(x0_vector, self.image_from_path(PATHS["x0"], scale=0.2).move_to(LEFT * 3 + UP * 1), stretch=True),
             run_time=2.0
         )
         
-        self.wait(2)
+        # self.wait(1)
+        
+        # # Fade out all vectors except x0_vector and focus on the decoding process
+        # self.play(
+        #     AnimationGroup(
+        #         FadeOut(xt_vector),
+        #         FadeOut(xtt_vector), 
+        #         FadeOut(xT_vector),
+        #         FadeOut(xt_label),
+        #         FadeOut(xtt_label),
+        #         FadeOut(xT_label),
+        #         lag_ratio=0.1
+        #     ),
+        #     run_time=1.5
+        # )
+
+        # self.play(
+        #     x0_vector.animate.shift(7.5 * RIGHT),
+        #     x0_label.animate.shift(7.5 * RIGHT),
+        #     run_time=1.0
+        # )
+
+        
+        # # # Create and add the visual decoder shape at the same height as other objects
+        # decoder_shape = self.create_decoder_shape()
+        # self.play(
+        #     Create(decoder_shape),
+        #     run_time=1.5
+        # )
+
+        # # Create a copy of x0_vector to fade transform into an image
+        # x0_vector_copy = x0_vector.copy()
+        
+        # # Create the final decoded image at the left of the decoder
+        # x0_decoded = self.image_from_path(PATHS["x0"], scale=0.2)
+        # x0_decoded = self.framed_image(x0_decoded, color=GREEN, buff=0.05)
+        # x0_decoded.move_to(LEFT * 3 + UP * 1)  # Position to the left of decoder
+        
+        # # Fade transform the vector copy to the decoded image
+        # self.play(
+        #     FadeTransform(x0_vector_copy, x0_decoded, stretch=True),
+        #     run_time=2.0
+        # )
+        
+        # self.wait(2)
 
