@@ -158,6 +158,42 @@ class BackwardTransitionSlide(Scene, DDPMBaseMixin):
         
         return Group(trapezoid, encoder_text)
     
+    def craete_nn(self):
+        input_layer = VGroup(*[Circle(radius=0.3, color=BLUE) for _ in range(3)])
+        input_layer.arrange(DOWN, buff=0.5)
+        input_layer.shift(LEFT * 3)
+        
+        # Hidden layer (4 nodes)
+        hidden_layer = VGroup(*[Circle(radius=0.3, color=GREEN) for _ in range(5)])
+        hidden_layer.arrange(DOWN, buff=0.4)
+        
+        # Output layer (2 nodes)
+        output_layer = VGroup(*[Circle(radius=0.3, color=RED) for _ in range(3)])
+        output_layer.arrange(DOWN, buff=0.6)
+        output_layer.shift(RIGHT * 3)
+        
+        # Create connections
+        connections = VGroup()
+        
+        # Input to hidden connections
+        for input_node in input_layer:
+            for hidden_node in hidden_layer:
+                line = Line(input_node.get_center(), hidden_node.get_center(), 
+                          stroke_width=2, color=GRAY)
+                connections.add(line)
+        
+        # Hidden to output connections
+        for hidden_node in hidden_layer:
+            for output_node in output_layer:
+                line = Line(hidden_node.get_center(), output_node.get_center(),
+                          stroke_width=2, color=GRAY)
+                connections.add(line)
+        
+        # Group all neural network components
+        neural_network = VGroup(connections, input_layer, hidden_layer, output_layer)
+        neural_network.scale(0.5)
+        return neural_network
+    
     def construct(self):
         self.setup_3b1b_style()
 
@@ -260,13 +296,12 @@ class BackwardTransitionSlide(Scene, DDPMBaseMixin):
         self.play(
             AnimationGroup(
                 # Fade out all images and their grids, fade in vectors
+                FadeOut(x0),
+                FadeOut(x0_grid),
                 FadeOut(x0_label),
                 FadeOut(xt),
                 FadeOut(xt_grid),
                 FadeOut(xt_label),
-                FadeOut(xtt),
-                FadeOut(xtt_grid),
-                FadeOut(xtt_label),
                 FadeOut(xT),
                 FadeOut(xT_grid),
                 FadeOut(xT_label),
@@ -275,15 +310,108 @@ class BackwardTransitionSlide(Scene, DDPMBaseMixin):
             run_time=2.0
         )
 
-        encoder_shape = self.create_encoder_shape()
+        neural_network = self.craete_nn()
+        neural_network.move_to(ORIGIN + UP)  # Center it at the top of the screen
+        # phi_theta
+        nn_label = MathTex("p_{\\theta}", font_size=24, color=WHITE)
+        nn_label.next_to(neural_network, DOWN, buff=0.2)
+
         self.play(
             AnimationGroup(
-                x0.animate.shift(1.5 * RIGHT),
-                x0_grid.animate.shift(1.5 * RIGHT),
+                xtt.animate.shift(5 * LEFT),
+                xtt_grid.animate.shift(5 * LEFT),
+                xtt_label.animate.shift(5 * LEFT),
             ),
-            FadeIn(encoder_shape),
+        )
+
+        self.play(
+            FadeIn(neural_network),
+            Write(nn_label)
+        )
+
+        self.wait(2)
+
+        x0_size = x0[0].height  # x0[0] is the image inside the frame
+        
+        # Create placeholder rectangles with the same size as x0
+        mu_grid = Rectangle(height=x0_size, width=x0_size, color=PINK, stroke_width=2, fill_opacity=0.1)
+        sigma_grid = Rectangle(height=x0_size, width=x0_size, color=PINK, stroke_width=2, fill_opacity=0.1)
+        
+        # Position them to the right of the neural network
+        nn_right_edge = neural_network.get_right()[0]
+        mu_grid.move_to([nn_right_edge + 1.75, 1, 0])
+        sigma_grid.move_to([nn_right_edge + 3.75, 1, 0])
+        
+        # Add grid lines to match x0's grid pattern
+        mu_grid_lines = self.add_grid_to_image(mu_grid, grid_color=PINK, opacity=0.6, lines_per_axis=8)
+        sigma_grid_lines = self.add_grid_to_image(sigma_grid, grid_color=PINK, opacity=0.6, lines_per_axis=8)
+        
+        # Create labels
+        mu_label = MathTex("\\mu_{t-1}", font_size=24, color=WHITE)
+        mu_label.next_to(mu_grid, DOWN, buff=0.2)
+        
+        sigma_label = MathTex("\\sigma_{t-1}", font_size=24, color=WHITE)
+        sigma_label.next_to(sigma_grid, DOWN, buff=0.2)
+        
+        # Create comma between the grids
+        comma = Text(",", font_size=36, color=WHITE)
+        comma.move_to([nn_right_edge + 2.75, 0.25, 0])
+        
+        # Fade in the output grids and labels
+        self.play(
+            AnimationGroup(
+                FadeIn(mu_grid),
+                FadeIn(mu_grid_lines),
+                Write(mu_label),
+                FadeIn(comma),
+                FadeIn(sigma_grid),
+                FadeIn(sigma_grid_lines),
+                Write(sigma_label),
+                lag_ratio=0.2
+            ),
+            run_time=2.0
+        )
+
+        self.wait(1)
+
+        self.play(
+            AnimationGroup(
+                FadeOut(xtt),
+                FadeOut(xtt_grid),
+                FadeOut(xtt_label),
+                FadeOut(mu_grid),
+                FadeOut(mu_grid_lines),
+                FadeOut(mu_label),
+                FadeOut(sigma_grid),
+                FadeOut(sigma_grid_lines),
+                FadeOut(sigma_label),
+                FadeOut(comma),
+                FadeOut(neural_network),
+                FadeOut(nn_label),
+            ),
+            run_time=2.0
+        )
+
+        xtt_label.shift(5 * RIGHT)
+
+        self.wait(1)
+
+
+
+
+        encoder_shape = self.create_encoder_shape()
+        x0.move_to(LEFT * 3 + UP * 1)
+        x0_grid.move_to(LEFT * 3 + UP * 1)
+
+        self.play(
+            AnimationGroup(
+                FadeIn(encoder_shape),
+                FadeIn(x0),
+                FadeIn(x0_grid),
+            ),
             lag_ratio=1
         )
+
 
         self.wait(1)
 
@@ -313,22 +441,6 @@ class BackwardTransitionSlide(Scene, DDPMBaseMixin):
         self.play(
             Write(x0_label)
         )
-
-
-        # Fade trasform
-
-
-
-        # self.play(
-        #     AnimationGroup(
-        #         FadeOut(x0, scale=0.5, target_position=encoder_shape.get_center() + 0.25*UP),
-        #         FadeOut(x0_grid, scale=0.5, target_position=encoder_shape.get_center() + 0.25*UP),
-        #     ),
-        #     FadeIn(x0_vector, target_position=encoder_shape.get_center() + 0.25*UP, scale=0.6),
-        # )
-
-
-
 
 
         
@@ -380,49 +492,4 @@ class BackwardTransitionSlide(Scene, DDPMBaseMixin):
             run_time=2.0
         )
         
-        # self.wait(1)
-        
-        # # Fade out all vectors except x0_vector and focus on the decoding process
-        # self.play(
-        #     AnimationGroup(
-        #         FadeOut(xt_vector),
-        #         FadeOut(xtt_vector), 
-        #         FadeOut(xT_vector),
-        #         FadeOut(xt_label),
-        #         FadeOut(xtt_label),
-        #         FadeOut(xT_label),
-        #         lag_ratio=0.1
-        #     ),
-        #     run_time=1.5
-        # )
-
-        # self.play(
-        #     x0_vector.animate.shift(7.5 * RIGHT),
-        #     x0_label.animate.shift(7.5 * RIGHT),
-        #     run_time=1.0
-        # )
-
-        
-        # # # Create and add the visual decoder shape at the same height as other objects
-        # decoder_shape = self.create_decoder_shape()
-        # self.play(
-        #     Create(decoder_shape),
-        #     run_time=1.5
-        # )
-
-        # # Create a copy of x0_vector to fade transform into an image
-        # x0_vector_copy = x0_vector.copy()
-        
-        # # Create the final decoded image at the left of the decoder
-        # x0_decoded = self.image_from_path(PATHS["x0"], scale=0.2)
-        # x0_decoded = self.framed_image(x0_decoded, color=GREEN, buff=0.05)
-        # x0_decoded.move_to(LEFT * 3 + UP * 1)  # Position to the left of decoder
-        
-        # # Fade transform the vector copy to the decoded image
-        # self.play(
-        #     FadeTransform(x0_vector_copy, x0_decoded, stretch=True),
-        #     run_time=2.0
-        # )
-        
-        # self.wait(2)
-
+        self.wait(1)
