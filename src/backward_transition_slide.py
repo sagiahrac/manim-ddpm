@@ -255,13 +255,11 @@ class BackwardTransitionSlide(Scene, DDPMBaseMixin):
                 Write(xtt_label),
                 FadeIn(xT),
                 Write(xT_label),
-                lag_ratio=0.3
+                lag_ratio=1
             ),
-            run_time=1.5
+            run_time=4
         )
         
-        # Wait a moment, then deploy grids on all images
-        self.wait(1)
         
         # Create grids for all images
         x0_grid = self.add_grid_to_image(x0[0], grid_color=BLUE)  # x0[0] is the image inside the frame
@@ -282,7 +280,7 @@ class BackwardTransitionSlide(Scene, DDPMBaseMixin):
         )
         
         # Final wait to show the result
-        self.wait(2)
+        self.wait(0.5)
         
         # Now transform all images into vectors (including x_0)
         # Create dot vector representations for all images
@@ -326,10 +324,11 @@ class BackwardTransitionSlide(Scene, DDPMBaseMixin):
 
         self.play(
             FadeIn(neural_network),
-            Write(nn_label)
+            Write(nn_label),
+            run_time=2.0
         )
 
-        self.wait(2)
+        self.wait(6)
 
         x0_size = x0[0].height  # x0[0] is the image inside the frame
         
@@ -372,7 +371,29 @@ class BackwardTransitionSlide(Scene, DDPMBaseMixin):
             run_time=2.0
         )
 
-        self.wait(1)
+        self.wait(4)
+
+        # highlight grids with white color, and return to original colors
+
+        self.play(
+            mu_grid.animate.set_color(WHITE),
+            mu_grid_lines.animate.set_color(WHITE),
+            sigma_grid.animate.set_color(WHITE),
+            sigma_grid_lines.animate.set_color(WHITE),
+            run_time=0.5
+        )
+
+        self.play(
+            mu_grid.animate.set_color(PINK),
+            mu_grid_lines.animate.set_color(PINK),
+            sigma_grid.animate.set_color(PINK),
+            sigma_grid_lines.animate.set_color(PINK),
+            run_time=0.5
+        )
+
+        self.wait(21)
+
+
 
         self.play(
             AnimationGroup(
@@ -394,7 +415,7 @@ class BackwardTransitionSlide(Scene, DDPMBaseMixin):
 
         xtt_label.shift(5 * RIGHT)
 
-        self.wait(1)
+        self.wait(4)
 
 
 
@@ -429,6 +450,7 @@ class BackwardTransitionSlide(Scene, DDPMBaseMixin):
             run_time=2.0
         )
 
+        self.wait(2)
 
         self.play(
             LaggedStart(
@@ -474,8 +496,6 @@ class BackwardTransitionSlide(Scene, DDPMBaseMixin):
             run_time=2.0
         )
 
-        self.wait(1)
-
         decoder_shape = self.create_decoder_shape()
         self.play(
             AnimationGroup(
@@ -484,9 +504,6 @@ class BackwardTransitionSlide(Scene, DDPMBaseMixin):
         )
 
         self.play(FadeIn(decoder_shape))
-
-        self.wait(1)
-
 
         decoder_center = decoder_shape.get_center() + 0.25 * UP
         x0_image_target = UP + 3 * LEFT  # Place the vector at the right of the encoder
@@ -502,16 +519,25 @@ class BackwardTransitionSlide(Scene, DDPMBaseMixin):
             run_time=2.0
         )
 
-        
         self.wait(1)
 
         self.play(
             FadeOut(decoder_shape),
         )
 
+        self.wait(1)
+
         self.play(
             x0.animate.shift(3 * RIGHT),
             x0_grid.animate.shift(3 * RIGHT),
+            run_time=2.0
+        )
+
+        self.wait(8)
+
+        self.play(
+            FadeOut(x0),
+            FadeOut(x0_grid),
             run_time=2.0
         )
 
