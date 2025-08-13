@@ -5,3 +5,5 @@ From the probabilistic side — we’re doing Variational Inference, maximizing 
 From the score-based side — that very same objective is equivalent to denoising score matching, where the model learns what’s called the score function — the gradient of the log probability — and in practice, it does that simply by predicting the noise that was added.
 
 And from a sampling perspective — the reverse process can be expressed as Langevin dynamics, an MCMC method that moves in the direction of the score while injecting Gaussian noise, step by step guiding samples closer to the true data distribution.
+
+DDPM’s innovation was to show that, under the epsilon-prediction parameterization, its weighted ELBO training objective can be written in the form of denoising score matching, and that sampling corresponds to annealed Langevin dynamics — linking these perspectives within one diffusion framework.

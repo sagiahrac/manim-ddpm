@@ -7,6 +7,7 @@ from PIL import Image
 class CelebAHQDemoSlide(Scene, DDPMBaseMixin):
     def construct(self):
         self.setup_3b1b_style()
+        self.add_sound("media/videos/individual_scenes/1080p60/C_CelebAHQDemoSlideScene-enhanced-v2.wav")
 
         pil_image = Image.open("media/images/celebahq_combined_6.png")
         img_width, img_height = pil_image.size
@@ -103,7 +104,7 @@ class CelebAHQDemoSlide(Scene, DDPMBaseMixin):
                 )
 
             # Hold on each slice
-            self.wait(0.5)
+            self.wait(0.25)
 
             # Store current elements for next iteration
             current_slice = framed_slice
@@ -123,7 +124,7 @@ class CelebAHQDemoSlide(Scene, DDPMBaseMixin):
 
 
         self.play(Write(question_text, run_time=0.75))
-        self.wait(2)
+        self.wait(7.2)
         self.play(FadeOut(question_text))
 
         # Clean up temporary files

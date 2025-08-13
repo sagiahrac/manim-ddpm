@@ -4,6 +4,7 @@ import numpy as np
 
 class ThreeGaussians3D(ThreeDScene):
     def construct(self):
+        self.add_sound("media/videos/individual_scenes/1080p60/E_ThreeGaussians3DScene-enhanced-v2.wav")
         resolution_fa = 24
         self.set_camera_orientation(phi=75 * DEGREES, theta=-30 * DEGREES)
 
@@ -332,7 +333,7 @@ class ThreeGaussians3D(ThreeDScene):
                 self.play(
                     sample_dot.animate.move_to(fall_position).set_opacity(0),
                     sample_label.animate.set_opacity(0),
-                    run_time=0.8,
+                    run_time=1,
                     rate_func=rush_into  # Accelerating downward fall
                 )
                 # Add a dramatic pause after the "fall"
@@ -347,4 +348,16 @@ class ThreeGaussians3D(ThreeDScene):
         
         # Final zoom out
         self.move_camera(zoom=0.8, run_time=2)
-        self.wait(2)
+        self.wait(1)
+
+        self.play(
+            FadeOut(current_surface),
+            FadeOut(sample_dot),
+            FadeOut(sample_label),
+            FadeOut(stage_title),
+            FadeOut(axes),
+            FadeOut(x_label),
+            FadeOut(y_label),
+            FadeOut(z_label),
+            run_time=1
+        )

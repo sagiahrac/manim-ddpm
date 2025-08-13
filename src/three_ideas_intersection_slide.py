@@ -4,7 +4,8 @@ from .base import DDPMBaseMixin
 class ThreeIdeasIntersectionSlide(Scene, DDPMBaseMixin):
     def construct(self):
         self.setup_3b1b_style()
-        
+        self.add_sound("media/videos/individual_scenes/1080p60/H_ThreeIdeasIntersectionSlideScene-enhanced-v2.wav")
+        self.wait(7)
         # Central DDPM
         ddpm_text = Text("DDPM", font_size=48, color=YELLOW, weight=BOLD)
         ddpm_text.move_to(ORIGIN + 0.5 * DOWN)
@@ -16,14 +17,14 @@ class ThreeIdeasIntersectionSlide(Scene, DDPMBaseMixin):
         # Position the three ideas around DDPM
         # Variational Inference - top
         vi_box = RoundedRectangle(width=2.5, height=1.25, corner_radius=0.3, color=BLUE, fill_opacity=0.2, stroke_width=2)
-        vi_text = Paragraph("Variational\nInference", font_size=24, color=BLUE, weight=BOLD, alignment="center")
+        vi_text = Paragraph("ELBO\nMaximization", font_size=24, color=BLUE, weight=BOLD, alignment="center")
         vi_text.move_to(vi_box.get_center())
         vi_group = VGroup(vi_box, vi_text)
         vi_group.move_to(UP * 2)
         
         # ELBO - bottom left
         elbo_box = RoundedRectangle(width=2.5, height=1.25, corner_radius=0.3, color=GREEN, fill_opacity=0.2, stroke_width=2)
-        elbo_text = Paragraph("ELBO\nMaximization", font_size=24, color=GREEN, weight=BOLD, alignment="center")
+        elbo_text = Paragraph("Langevin\nDynamics", font_size=24, color=GREEN, weight=BOLD, alignment="center")
         elbo_text.move_to(elbo_box.get_center())
         elbo_group = VGroup(elbo_box, elbo_text)
         elbo_group.move_to(DOWN * 2 + LEFT * 3)
@@ -67,19 +68,19 @@ class ThreeIdeasIntersectionSlide(Scene, DDPMBaseMixin):
             FadeIn(vi_group),
             run_time=1
         )
-        self.wait(0.5)
+        self.wait(13)
+
+        self.play(
+            FadeIn(score_group),
+            run_time=1
+        )
+        self.wait(16)
         
         self.play(
             FadeIn(elbo_group),
             run_time=1
         )
-        self.wait(0.5)
-        
-        self.play(
-            FadeIn(score_group),
-            run_time=1
-        )
-        self.wait(1)
+        self.wait(10)
         
         # Show arrows pointing to center
         self.play(
@@ -97,6 +98,8 @@ class ThreeIdeasIntersectionSlide(Scene, DDPMBaseMixin):
             run_time=2
         )
 
+        self.wait(12)
+
         # Final emphasis
         self.play(
             ddpm_text.animate.scale(1.2),
@@ -110,7 +113,10 @@ class ThreeIdeasIntersectionSlide(Scene, DDPMBaseMixin):
             run_time=1
         )
         
-        self.wait(3)
+        self.play(
+            FadeOut(VGroup(ddpm_text, ddpm_background, vi_group, elbo_group, score_group, arrow_vi, arrow_elbo, arrow_score)),
+            run_time=2
+        )
 
 class ThreeIdeasIntersectionSlideScene(ThreeIdeasIntersectionSlide):
     """Scene wrapper for individual_scenes.py"""

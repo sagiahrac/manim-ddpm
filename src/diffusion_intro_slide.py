@@ -6,7 +6,7 @@ class DiffusionIntroSlide(Scene, DDPMBaseMixin):
     def construct(self):
         self.setup_3b1b_style()
 
-        self.add_sound("/Users/sagi/Music/GarageBand/B.m4a")
+        self.add_sound("media/videos/individual_scenes/1080p60/B_DiffusionIntroSlideScene-enhanced-v2.wav")
         # self.wait(10)
 
         models_group = VGroup()

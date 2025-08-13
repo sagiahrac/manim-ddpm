@@ -196,6 +196,7 @@ class BackwardTransitionSlide(Scene, DDPMBaseMixin):
     
     def construct(self):
         self.setup_3b1b_style()
+        self.add_sound("media/videos/individual_scenes/1080p60/F_BackwardTransitionSlideScene-enhanced-v2.wav")
 
         
         x0 = self.image_from_path(PATHS["x0"], scale=0.2)
@@ -533,7 +534,7 @@ class BackwardTransitionSlide(Scene, DDPMBaseMixin):
             run_time=2.0
         )
 
-        self.wait(8)
+        self.wait(8.5)
 
         self.play(
             FadeOut(x0),

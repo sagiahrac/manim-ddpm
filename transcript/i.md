@@ -1,7 +1,9 @@
-But even latent diffusion leaves room to grow.
-Looking ahead, one promising path is a truly joint encoder–decoder–diffusion framework, trained end-to-end so that compression and generation evolve together, rather than being learned in separate stages.
+Latent diffusion is a big step forward, but there’s still room to push further.
+
+The next natural step is a truly joint encoder–decoder–diffusion framework, trained end-to-end so that compression and generation evolve together, rather than being learned in separate stages.
+
 In most current implementations, the encoder and decoder are trained first as a standalone autoencoder, and then kept fixed while the diffusion model is trained in that predefined latent space.
-This simplifies training, but it means the latent representation can’t adapt to the specific needs of the diffusion process — and the generator can’t influence how information is compressed or reconstructed.
+This makes training easier, but it locks the latent representation in place, preventing it from adapting to the diffusion process or letting the generator shape what gets preserved and how it’s rebuilt.
 
 Another direction for improvement could be making the forward process itself learnable.
 In standard diffusion, noise is added in a fixed way: the schedule, the distribution, and the variance are all chosen before training, and the same Gaussian noise is applied independently to every pixel and channel at each step.

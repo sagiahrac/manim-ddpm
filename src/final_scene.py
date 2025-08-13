@@ -181,9 +181,12 @@ class FinalScene(Scene, DDPMBaseMixin):
     
     def construct(self):
         self.setup_3b1b_style()
+        self.add_sound("media/videos/individual_scenes/1080p60/Z_FinalScene-enhanced-v2.wav")
+
+        self.wait(6)
 
         # Bullet 1: Joint End-to-End Training with full_framework
-        bullet1 = Text("1. Joint End-to-End Training", font_size=24, color=YELLOW, weight=BOLD)
+        bullet1 = Text("1. Joint Encoder-Decoder-Diffusion Training", font_size=24, color=WHITE, weight=BOLD)
         bullet1.move_to(UP * 2 + LEFT * 3)
         
         # Create the encoder-decoder-neural network framework
@@ -208,10 +211,10 @@ class FinalScene(Scene, DDPMBaseMixin):
             FadeIn(full_framework),
             run_time=2
         )
-        self.wait(1)
+        self.wait(35)
 
         # Bullet 2: Learnable Forward Process with q_phi
-        bullet2 = Text("2. Learnable Forward Process", font_size=24, color=YELLOW, weight=BOLD)
+        bullet2 = Text("2. Learnable Forward Process", font_size=24, color=WHITE, weight=BOLD)
         bullet2.move_to(ORIGIN + LEFT * 3)
 
         q_phi = MathTex(r"q_\phi(x_t | x_{t-1})", color=WHITE, font_size=32)
@@ -222,10 +225,10 @@ class FinalScene(Scene, DDPMBaseMixin):
             Write(q_phi),
             run_time=2
         )
-        self.wait(1)
+        self.wait(34)
 
         # Bullet 3: Adaptive Compression with beatles image
-        bullet3 = Text("3. Adaptive Compression", font_size=24, color=YELLOW, weight=BOLD)
+        bullet3 = Text("3. Adaptive Compression", font_size=24, color=WHITE, weight=BOLD)
         bullet3.move_to(DOWN * 2 + LEFT * 3)
 
         beatles = self.image_from_path("beatles_neg.png", scale=0.4)
@@ -237,7 +240,7 @@ class FinalScene(Scene, DDPMBaseMixin):
             FadeIn(beatles_framed),
             run_time=2
         )
-        self.wait(2)
+        self.wait(7)
 
 
         # Fade out everything
@@ -258,11 +261,11 @@ class FinalScene(Scene, DDPMBaseMixin):
         lines = VGroup(line1, line2, line3).arrange(DOWN, aligned_edge=ORIGIN, buff=0.2)
 
         self.play(FadeIn(line1))
-        self.wait(3)
+        self.wait(1)
         self.play(FadeIn(line2))
-        self.wait(2)
+        self.wait(1)
         self.play(FadeIn(line3))
-        self.wait(3)
+        self.wait(4)
         conclusion = lines
 
         self.play(

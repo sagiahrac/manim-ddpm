@@ -5,7 +5,7 @@ from .base import DDPMBaseMixin
 class TitleSlide(Scene, DDPMBaseMixin):
     def construct(self):
         self.setup_3b1b_style()
-        self.add_sound("/Users/sagi/Music/GarageBand/A.m4a")
+        self.add_sound("media/videos/individual_scenes/1080p60/A_TitleSlideScene-enhanced-v2.wav")
 
         # 3B1B style title with elegant typography
         title = Text(
